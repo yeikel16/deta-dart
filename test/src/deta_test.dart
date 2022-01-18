@@ -370,5 +370,85 @@ void main() {
         );
       });
     });
+
+    group('insert', () {
+      test('an `int` type into DB', () async {
+        const key = 'number1';
+        const value = 16;
+
+        when(
+          () => mockDio.post<Map<String, Map<String, List>>>(
+            tUrl,
+            options: any(named: 'options'),
+            data: {
+              'items': [
+                {'key': key, 'value': value}
+              ]
+            },
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: <String, Map<String, List>>{
+              'processed': {
+                'items': <dynamic>[
+                  {
+                    'key': key,
+                    'value': value,
+                  }
+                ]
+              }
+            },
+            statusCode: 201,
+            requestOptions: RequestOptions(
+              path: tUrl,
+            ),
+          ),
+        );
+
+        final base = tDeta.base(tBaseName);
+        final put = await base.insert(16, key: key);
+
+        expect(put, equals({'key': 'number1', 'value': 16}));
+      });
+
+      test('should throw `DetaObjectException`when the key already exists', () {
+        when(
+          () => mockDio.post<Map<String, Map<String, List>>>(
+            tUrl,
+            options: any(named: 'options'),
+            data: {
+              'items': [
+                {'value': 'hello'}
+              ]
+            },
+          ),
+        ).thenThrow(
+          DioError(
+            requestOptions: RequestOptions(
+              path: tUrl,
+            ),
+            response: Response<Map<String, dynamic>>(
+              data: <String, dynamic>{
+                'errors': ['Key already exists']
+              },
+              statusCode: 409,
+              requestOptions: RequestOptions(
+                path: tUrl,
+              ),
+            ),
+            error: DioErrorType.response,
+          ),
+        );
+        final base = tDeta.base(tBaseName);
+
+        expect(
+          () => base.insert('hello'),
+          throwsA(
+            isA<DetaObjectException>()
+                .having((e) => e.message, 'message', 'Key already exists'),
+          ),
+        );
+      });
+    });
   });
 }

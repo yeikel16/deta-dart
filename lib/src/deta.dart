@@ -54,9 +54,11 @@ abstract class DetaBase {
   /// Stores an item in the database but raises an error if the key
   /// already exists.
   ///
+  /// Throw [DetaObjectException] if key already exists.
+  ///
   /// Note that it checks if the item exists before saving
   /// to the db, consequently it is slower than [put].
-  Future<Map<String, dynamic>> insert({String? key, required Object item});
+  Future<Map<String, dynamic>> insert(Object item, {String? key});
 
   /// Retrieves an item from the database by its key.
   Future<Map<String, dynamic>> get({required String key});
@@ -131,9 +133,33 @@ class _DetaBase extends DetaBase {
   }
 
   @override
-  Future<Map<String, dynamic>> insert({String? key, required Object item}) {
-    // TODO: implement insert
-    throw UnimplementedError();
+  Future<Map<String, dynamic>> insert(Object item, {String? key}) async {
+    final map = <String, dynamic>{};
+
+    if (key != null) {
+      map['key'] = key;
+    }
+
+    _checkValidObjectType(item, map);
+
+    try {
+      final response = await dio.post<Map<String, dynamic>>(
+        '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items',
+        options: _authorizationHeader(),
+        data: {
+          'items': [map],
+        },
+      );
+
+      if (response.data != null) {
+        final responseData = response.data!.cast<String, Map<String, List>>();
+
+        return responseData['processed']!['items']![0] as Map<String, dynamic>;
+      }
+    } on DioError catch (e) {
+      throw _handleError(e);
+    }
+    throw const DetaException();
   }
 
   @override
@@ -243,15 +269,16 @@ class _DetaBase extends DetaBase {
   Exception _handleError(DioError e) {
     if (e.response != null) {
       final data = e.response!.data as Map<String, dynamic>;
+      final message = (data.cast<String, List<String>>())['errors']!.first;
+
       if (e.response!.statusCode == 400) {
-        return DetaException(
-          message: (data.cast<String, List<String>>())['errors']!.first,
-        );
+        return DetaException(message: message);
       }
       if (e.response!.statusCode == 401) {
-        return DetaUnauthorizedException(
-          message: (data.cast<String, List<String>>())['errors']!.first,
-        );
+        return DetaUnauthorizedException(message: message);
+      }
+      if (e.response!.statusCode == 409) {
+        return DetaObjectException(message: message);
       }
     }
     return const DetaException();
