@@ -258,5 +258,117 @@ void main() {
         );
       });
     });
+
+    group('putMany', () {
+      final items = <String>['hello', 'world'];
+      final itemsMap = items.map((e) {
+        if (e is Map) {
+          return e;
+        }
+        return {'value': e};
+      }).toList();
+
+      test('should throw `DetaException` when the list is greater than 25', () {
+        final base = tDeta.base(tBaseName);
+
+        expect(
+          base.putMany(items: List.generate(26, (index) => index)),
+          throwsA(
+            isA<DetaException>().having(
+              (a) => a.message,
+              'message',
+              'The size of the list is greater than 25',
+            ),
+          ),
+        );
+      });
+
+      test(
+          'should throw `DetaObjectException` when the list contains '
+          'an invalid object', () {
+        final base = tDeta.base(tBaseName);
+
+        expect(
+          () => base.putMany(items: <Object>['hello', 'world', Options()]),
+          throwsA(isA<DetaObjectException>()),
+        );
+      });
+
+      test('should return a list of items save in DB', () async {
+        final answer = <dynamic>[
+          {
+            'key': '8vxiwhhad06m',
+            'value': 'hello',
+          },
+          {
+            'key': '8vxiwhhadass',
+            'value': 'world',
+          }
+        ];
+
+        when(
+          () => mockDio.put<Map<String, Map<String, List>>>(
+            tUrl,
+            options: any(named: 'options'),
+            data: {'items': itemsMap},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: <String, Map<String, List>>{
+              'processed': {'items': answer}
+            },
+            statusCode: 207,
+            requestOptions: RequestOptions(
+              path: tUrl,
+            ),
+          ),
+        );
+
+        final base = tDeta.base(tBaseName);
+        final result = await base.putMany(items: items);
+
+        expect(
+          result,
+          equals(answer),
+        );
+      });
+
+      test(
+          'should throw `DetaUnauthorizedException`when the call '
+          'is not authorized', () {
+        when(
+          () => mockDio.put<Map<String, Map<String, List>>>(
+            tUrl,
+            options: any(named: 'options'),
+            data: {'items': itemsMap},
+          ),
+        ).thenThrow(
+          DioError(
+            requestOptions: RequestOptions(
+              path: tUrl,
+            ),
+            response: Response<Map<String, dynamic>>(
+              data: <String, dynamic>{
+                'errors': ['Unauthorized']
+              },
+              statusCode: 401,
+              requestOptions: RequestOptions(
+                path: tUrl,
+              ),
+            ),
+            error: DioErrorType.response,
+          ),
+        );
+        final base = tDeta.base(tBaseName);
+
+        expect(
+          () => base.putMany(items: items),
+          throwsA(
+            isA<DetaUnauthorizedException>()
+                .having((e) => e.message, 'message', 'Unauthorized'),
+          ),
+        );
+      });
+    });
   });
 }

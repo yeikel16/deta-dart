@@ -48,7 +48,8 @@ abstract class DetaBase {
   /// Stores a list if items in the database.
   ///
   /// It will update an item if the key already exists.
-  Future<Map<String, dynamic>> putMany({required List<Object> items});
+  /// Throw an `DetaException` if you attempt to put more than 25 items.
+  Future<List<Map<String, dynamic>>> putMany({required List<Object> items});
 
   /// Stores an item in the database but raises an error if the key
   /// already exists.
@@ -155,9 +156,43 @@ class _DetaBase extends DetaBase {
   }
 
   @override
-  Future<Map<String, dynamic>> putMany({required List<Object> items}) {
-    // TODO: implement putMany
-    throw UnimplementedError();
+  Future<List<Map<String, dynamic>>> putMany({
+    required List<Object> items,
+  }) async {
+    if (items.length > 25) {
+      throw const DetaException(
+        message: 'The size of the list is greater than 25',
+      );
+    }
+
+    items.every(_checkValidObjectType);
+
+    final result = items.map((e) {
+      if (e is Map) {
+        return e;
+      }
+      return {'value': e};
+    }).toList();
+
+    try {
+      final response = await dio.put<Map<String, dynamic>>(
+        '$baseUrl/$apiVersion/${deta.projectId}/$baseName',
+        options: _authorizationHeader(),
+        data: {
+          'items': result,
+        },
+      );
+
+      if (response.data != null) {
+        final responseData = response.data!.cast<String, Map<String, List>>();
+
+        return List<Map<String, dynamic>>.from(
+          responseData['processed']!['items']!,
+        );
+      }
+    } on DioError catch (e) {
+      throw _handleError(e);
+    }
     throw const DetaException();
   }
 
