@@ -120,11 +120,11 @@ class _DetaBase extends DetaBase {
     } else if (item is List) {
       map['value'] = item;
     } else {
-      throw UnsupportedError(
-        '${item.runtimeType} is not supported. '
-        'It is recommended to pass the object ${item.runtimeType} '
-        'in the form of `Map`. '
-        'Example: User(name: "John", age: 30) to `{name: "John", age: 30}`',
+      throw DetaObjectException(
+        message: '${item.runtimeType} is not supported. '
+            'It is recommended to pass the object ${item.runtimeType} '
+            'in the form of `Map`. '
+            'Example: User(name: "John", age: 30) to `{name: "John", age: 30}`',
       );
     }
 
@@ -158,6 +158,30 @@ class _DetaBase extends DetaBase {
   Future<Map<String, dynamic>> putMany({required List<Object> items}) {
     // TODO: implement putMany
     throw UnimplementedError();
+    throw const DetaException();
+  }
+
+  bool _checkValidObjectType(Object item) {
+    if (item is Map) {
+      return true;
+    } else if (item is bool) {
+      return true;
+    } else if (item is String) {
+      return true;
+    } else if (item is int) {
+      return true;
+    } else if (item is double) {
+      return true;
+    } else if (item is List) {
+      return true;
+    } else {
+      throw DetaObjectException(
+        message: '${item.runtimeType} is not supported. '
+            'It is recommended to pass the object ${item.runtimeType} '
+            'in the form of `Map`. '
+            'Example: User(name: "John", age: 30) to `{name: "John", age: 30}`',
+      );
+    }
   }
 
   @override
@@ -199,7 +223,7 @@ class _DetaBase extends DetaBase {
       final data = e.response!.data as Map<String, dynamic>;
       if (e.response!.statusCode == 400) {
         return DetaException(
-          message: (data.cast<String, List<String>>())['errors']!,
+          message: (data.cast<String, List<String>>())['errors']!.first,
         );
       }
       if (e.response!.statusCode == 401) {

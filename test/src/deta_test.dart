@@ -24,22 +24,23 @@ void main() {
     );
   });
 
-  void whenPutEspecificType<E>(E data, [String? key]) {
+  void whenPutEspecificType<E>(E data, {String? key}) {
+    final items = <dynamic>[];
+
+    if (data is Map) {
+      items.add(data);
+    } else {
+      items.add(<String, dynamic>{
+        if (key != null) 'key': key,
+        'value': data,
+      });
+    }
+
     when(
       () => mockDio.put<Map<String, Map<String, List>>>(
         tUrl,
         options: any(named: 'options'),
-        data: {
-          'items': [
-            if (data is Map)
-              data
-            else
-              {
-                if (key != null) 'key': key,
-                'value': data,
-              }
-          ]
-        },
+        data: {'items': items},
       ),
     ).thenAnswer(
       (_) async => Response(
@@ -71,7 +72,7 @@ void main() {
     group('put', () {
       const tPutKey = '8vxiwhhad06m';
       test('when the key is not null', () async {
-        whenPutEspecificType<String>('deta', 'custom_key');
+        whenPutEspecificType<String>('deta', key: 'custom_key');
 
         final base = tDeta.base(tBaseName);
         final put = await base.put('deta', key: 'custom_key');
@@ -160,15 +161,15 @@ void main() {
         );
       });
 
-      test('should throw a `UnsupportedError` when is no a primitive object',
-          () async {
+      test('should throw `DetaObjectException` when is not a primitive object',
+          () {
         final tFakeObject = Options();
         final base = tDeta.base(tBaseName);
 
-        expect(base.put(tFakeObject), throwsUnsupportedError);
+        expect(base.put(tFakeObject), throwsA(isA<DetaObjectException>()));
       });
 
-      test('should throw a `DetaExcepcion` when the key is a empty string',
+      test('should throw `DetaExcepcion` when the key is a empty string',
           () async {
         when(
           () => mockDio.put<Map<String, dynamic>>(
@@ -207,13 +208,13 @@ void main() {
           () => base.put('deta', key: ''),
           throwsA(
             isA<DetaException>()
-                .having((e) => e.message, 'message', const ['Bad item']),
+                .having((e) => e.message, 'message', 'Bad item'),
           ),
         );
       });
 
       test(
-          'should throw a `DetaUnauthorizedException`when the call '
+          'should throw `DetaUnauthorizedException`when the call '
           'is not authorized', () async {
         when(
           () => mockDio.put<Map<String, dynamic>>(

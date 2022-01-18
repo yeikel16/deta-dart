@@ -2,13 +2,19 @@
 import 'dart:core';
 
 class DetaException implements Exception {
-  const DetaException({this.message = const ['Bad requests']});
+  const DetaException({this.message = 'Bad requests'});
 
-  final List<String> message;
+  final String message;
 }
 
 class DetaUnauthorizedException implements Exception {
   const DetaUnauthorizedException({required this.message});
+
+  final String message;
+}
+
+class DetaObjectException implements Exception {
+  const DetaObjectException({required this.message});
 
   final String message;
 }
