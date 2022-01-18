@@ -108,30 +108,11 @@ class _DetaBase extends DetaBase {
       map['key'] = key;
     }
 
-    if (item is Map) {
-      map.addAll(item as Map<String, dynamic>);
-    } else if (item is bool) {
-      map['value'] = item;
-    } else if (item is String) {
-      map['value'] = item;
-    } else if (item is int) {
-      map['value'] = item;
-    } else if (item is double) {
-      map['value'] = item;
-    } else if (item is List) {
-      map['value'] = item;
-    } else {
-      throw DetaObjectException(
-        message: '${item.runtimeType} is not supported. '
-            'It is recommended to pass the object ${item.runtimeType} '
-            'in the form of `Map`. '
-            'Example: User(name: "John", age: 30) to `{name: "John", age: 30}`',
-      );
-    }
+    _checkValidObjectType(item, map);
 
     try {
       final response = await dio.put<Map<String, dynamic>>(
-        '$baseUrl/$apiVersion/${deta.projectId}/$baseName',
+        '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items',
         options: _authorizationHeader(),
         data: {
           'items': [map],
@@ -165,7 +146,7 @@ class _DetaBase extends DetaBase {
       );
     }
 
-    items.every(_checkValidObjectType);
+    items.every((item) => _checkValidObjectType(item, <String, dynamic>{}));
 
     final result = items.map((e) {
       if (e is Map) {
@@ -176,7 +157,7 @@ class _DetaBase extends DetaBase {
 
     try {
       final response = await dio.put<Map<String, dynamic>>(
-        '$baseUrl/$apiVersion/${deta.projectId}/$baseName',
+        '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items',
         options: _authorizationHeader(),
         data: {
           'items': result,
@@ -196,18 +177,24 @@ class _DetaBase extends DetaBase {
     throw const DetaException();
   }
 
-  bool _checkValidObjectType(Object item) {
+  bool _checkValidObjectType(Object item, Map<String, dynamic> map) {
     if (item is Map) {
+      map.addAll(item as Map<String, dynamic>);
       return true;
     } else if (item is bool) {
+      map['value'] = item;
       return true;
     } else if (item is String) {
+      map['value'] = item;
       return true;
     } else if (item is int) {
+      map['value'] = item;
       return true;
     } else if (item is double) {
+      map['value'] = item;
       return true;
     } else if (item is List) {
+      map['value'] = item;
       return true;
     } else {
       throw DetaObjectException(

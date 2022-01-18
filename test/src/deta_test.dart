@@ -13,7 +13,7 @@ void main() {
   const tProjectId = 'project_id';
   const tProjectKey = 'project_key';
   const tBaseName = 'base_name';
-  const tUrl = 'https://database.deta.sh/v1/$tProjectId/$tBaseName';
+  const tUrl = 'https://database.deta.sh/v1/$tProjectId/$tBaseName/items';
 
   setUpAll(() {
     mockDio = MockDio();
