@@ -521,5 +521,59 @@ void main() {
         );
       });
     });
+    group('delete', () {
+      const key = '100';
+      test('a stored item', () async {
+        when(
+          () => mockDio.get<Map<String, dynamic>>(
+            Uri.encodeComponent('$tUrl/$key'),
+            options: any(named: 'options'),
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: <String, dynamic>{
+              'key': key,
+            },
+            statusCode: 200,
+            requestOptions: RequestOptions(
+              path: Uri.encodeComponent('$tUrl/$key'),
+            ),
+          ),
+        );
+
+        final base = tDeta.base(tBaseName);
+        final result = await base.delete(key);
+
+        expect(result, isTrue);
+      });
+
+      test('should throw `DetaException` when occurs an error in the call.',
+          () async {
+        when(
+          () => mockDio.get<Map<String, dynamic>>(
+            Uri.encodeComponent('$tUrl/$key'),
+            options: any(named: 'options'),
+          ),
+        ).thenThrow(
+          DioError(
+            requestOptions: RequestOptions(
+              path: Uri.encodeComponent('$tUrl/$key'),
+            ),
+            response: Response<Map<String, dynamic>>(
+              data: <String, dynamic>{'key': key},
+              statusCode: 400,
+              requestOptions: RequestOptions(
+                path: Uri.encodeComponent('$tUrl/$key'),
+              ),
+            ),
+            error: DioErrorType.response,
+          ),
+        );
+
+        final base = tDeta.base(tBaseName);
+
+        expect(await base.delete(key), isFalse);
+      });
+    });
   });
 }

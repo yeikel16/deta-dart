@@ -68,7 +68,9 @@ abstract class DetaBase {
   Future<Map<String, dynamic>> fetch(Map<String, dynamic> filters);
 
   /// Deletes an item from the database.
-  Future<bool> delete({required String key});
+  ///
+  /// Return `true` regardless if an item with that key existed or not.
+  Future<bool> delete(String key);
 
   /// Updates an item in the database.
   Future<Map> update({required String key, required Object value});
@@ -261,9 +263,24 @@ class _DetaBase extends DetaBase {
   }
 
   @override
-  Future<bool> delete({required String key}) {
-    // TODO: implement delete
-    throw UnimplementedError();
+  Future<bool> delete(String key) async {
+    try {
+      final response = await dio.get<Map<String, dynamic>>(
+        Uri.encodeComponent(
+          '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items/$key',
+        ),
+        options: _authorizationHeader(),
+      );
+
+      if (response.data != null) {
+        final responseData = response.data!.cast<String, String>();
+
+        return responseData['key']! == key;
+      }
+    } on DioError catch (_) {
+      return false;
+    }
+    return false;
   }
 
   @override
