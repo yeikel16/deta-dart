@@ -245,9 +245,7 @@ class _DetaBase extends DetaBase {
       );
 
       if (response.data != null) {
-        final responseData = response.data!.cast<String, Map<String, List>>();
-
-        return responseData['processed']!['items']![0] as Map<String, dynamic>;
+        return response.data!.cast<String, dynamic>();
       }
     } on DioError catch (e) {
       throw _handleError(e);
@@ -303,7 +301,7 @@ class _DetaBase extends DetaBase {
       if (e.response!.statusCode == 404) {
         final data = e.response!.data as Map<String, dynamic>;
         final key = (data.cast<String, Object>())['key'];
-        return DetaItemNotFoundException(message: 'The key $key not was found');
+        return DetaItemNotFoundException(message: 'Key $key was not found');
       }
 
       final data = e.response!.data as Map<String, dynamic>;

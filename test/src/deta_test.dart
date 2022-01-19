@@ -451,24 +451,16 @@ void main() {
     });
     group('get', () {
       const key = 'book1';
-      const value = 'The Green Book';
       test('a stored item when the key is valid', () async {
         when(
-          () => mockDio.get<Map<String, Map<String, List>>>(
+          () => mockDio.get<Map<String, dynamic>>(
             Uri.encodeComponent('$tUrl/$key'),
             options: any(named: 'options'),
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: <String, Map<String, List>>{
-              'processed': {
-                'items': <dynamic>[
-                  {
-                    'key': key,
-                    'value': value,
-                  }
-                ]
-              }
+            data: <String, dynamic>{
+              'key': key,
             },
             statusCode: 200,
             requestOptions: RequestOptions(
@@ -480,7 +472,7 @@ void main() {
         final base = tDeta.base(tBaseName);
         final result = await base.get(key);
 
-        expect(result, equals({'key': key, 'value': value}));
+        expect(result, equals({'key': key}));
       });
 
       test(
@@ -515,7 +507,7 @@ void main() {
             isA<DetaItemNotFoundException>().having(
               (e) => e.message,
               'message',
-              'The key $key not was found',
+              'Key $key was not found',
             ),
           ),
         );
