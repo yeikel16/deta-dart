@@ -61,7 +61,7 @@ abstract class DetaBase {
   Future<Map<String, dynamic>> insert(Object item, {String? key});
 
   /// Retrieves an item from the database by its key.
-  Future<Map<String, dynamic>> get({required String key});
+  Future<Map<String, dynamic>> get(String key);
 
   /// Retrieves multiple items from the database based on the
   /// provided (optional) filters.
@@ -233,9 +233,24 @@ class _DetaBase extends DetaBase {
   }
 
   @override
-  Future<Map<String, dynamic>> get({required String key}) {
-    // TODO: implement get
-    throw UnimplementedError();
+  Future<Map<String, dynamic>> get(String key) async {
+    try {
+      final response = await dio.get<Map<String, dynamic>>(
+        Uri.encodeComponent(
+          '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items/$key',
+        ),
+        options: _authorizationHeader(),
+      );
+
+      if (response.data != null) {
+        final responseData = response.data!.cast<String, Map<String, List>>();
+
+        return responseData['processed']!['items']![0] as Map<String, dynamic>;
+      }
+    } on DioError catch (e) {
+      throw _handleError(e);
+    }
+    throw const DetaException();
   }
 
   @override
@@ -268,6 +283,12 @@ class _DetaBase extends DetaBase {
 
   Exception _handleError(DioError e) {
     if (e.response != null) {
+      if (e.response!.statusCode == 404) {
+        final data = e.response!.data as Map<String, dynamic>;
+        final key = (data.cast<String, Object>())['key'];
+        return DetaItemNotFoundException(message: 'The key $key not was found');
+      }
+
       final data = e.response!.data as Map<String, dynamic>;
       final message = (data.cast<String, List<String>>())['errors']!.first;
 

@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_const_constructors
 import 'package:deta/deta.dart';
 import 'package:deta/src/exceptions.dart';
 import 'package:dio/dio.dart';
@@ -446,6 +445,78 @@ void main() {
           throwsA(
             isA<DetaObjectException>()
                 .having((e) => e.message, 'message', 'Key already exists'),
+          ),
+        );
+      });
+    });
+    group('get', () {
+      const key = 'book1';
+      const value = 'The Green Book';
+      test('a stored item when the key is valid', () async {
+        when(
+          () => mockDio.get<Map<String, Map<String, List>>>(
+            Uri.encodeComponent('$tUrl/$key'),
+            options: any(named: 'options'),
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: <String, Map<String, List>>{
+              'processed': {
+                'items': <dynamic>[
+                  {
+                    'key': key,
+                    'value': value,
+                  }
+                ]
+              }
+            },
+            statusCode: 200,
+            requestOptions: RequestOptions(
+              path: Uri.encodeComponent('$tUrl/$key'),
+            ),
+          ),
+        );
+
+        final base = tDeta.base(tBaseName);
+        final result = await base.get(key);
+
+        expect(result, equals({'key': key, 'value': value}));
+      });
+
+      test(
+          'should throw `DetaItemNotFoundException` when the key is not exists',
+          () {
+        when(
+          () => mockDio.get<Map<String, Map<String, List>>>(
+            Uri.encodeComponent('$tUrl/$key'),
+            options: any(named: 'options'),
+          ),
+        ).thenThrow(
+          DioError(
+            requestOptions: RequestOptions(
+              path: Uri.encodeComponent('$tUrl/$key'),
+            ),
+            response: Response<Map<String, dynamic>>(
+              data: <String, dynamic>{'key': key},
+              statusCode: 404,
+              requestOptions: RequestOptions(
+                path: Uri.encodeComponent('$tUrl/$key'),
+              ),
+            ),
+            error: DioErrorType.response,
+          ),
+        );
+
+        final base = tDeta.base(tBaseName);
+
+        expect(
+          () => base.get(key),
+          throwsA(
+            isA<DetaItemNotFoundException>().having(
+              (e) => e.message,
+              'message',
+              'The key $key not was found',
+            ),
           ),
         );
       });

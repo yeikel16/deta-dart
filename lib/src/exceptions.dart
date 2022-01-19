@@ -18,3 +18,9 @@ class DetaObjectException implements Exception {
 
   final String message;
 }
+
+class DetaItemNotFoundException implements Exception {
+  const DetaItemNotFoundException({this.message = 'Key not found'});
+
+  final String message;
+}
