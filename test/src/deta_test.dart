@@ -567,5 +567,124 @@ void main() {
         expect(await base.delete(key), isFalse);
       });
     });
+
+    group('update', () {
+      const key = '100';
+      const item = {'name': 'deta', 'email': 'hello@deta.com'};
+      test('a stored item', () async {
+        when(
+          () => mockDio.patch<Map<String, dynamic>>(
+            Uri.encodeComponent('$tUrl/$key'),
+            options: any(named: 'options'),
+            data: {'set': item},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: <String, dynamic>{'key': key, 'set': item},
+            statusCode: 200,
+            requestOptions: RequestOptions(
+              path: Uri.encodeComponent('$tUrl/$key'),
+            ),
+          ),
+        );
+
+        final base = tDeta.base(tBaseName);
+        final result = await base.update(key: key, item: item);
+
+        expect(result, equals(item));
+      });
+
+      test('should throw `DetaException` when the `key` is empty', () async {
+        final base = tDeta.base(tBaseName);
+
+        expect(
+          () => base.update(key: '', item: <String, dynamic>{}),
+          throwsA(
+            isA<DetaException>()
+                .having((e) => e.message, 'message', 'Key cannot be empty'),
+          ),
+        );
+      });
+
+      test(
+          'should throw `DetaItemNotFoundException` '
+          'when the key does not exist', () async {
+        when(
+          () => mockDio.patch<Map<String, dynamic>>(
+            Uri.encodeComponent('$tUrl/$key'),
+            options: any(named: 'options'),
+            data: {'set': item},
+          ),
+        ).thenThrow(
+          DioError(
+            requestOptions: RequestOptions(
+              path: Uri.encodeComponent('$tUrl/$key'),
+            ),
+            response: Response<Map<String, dynamic>>(
+              data: <String, dynamic>{
+                'errors': ['Key not found']
+              },
+              statusCode: 404,
+              requestOptions: RequestOptions(
+                path: Uri.encodeComponent('$tUrl/$key'),
+              ),
+            ),
+            error: DioErrorType.response,
+          ),
+        );
+
+        final base = tDeta.base(tBaseName);
+
+        expect(
+          () => base.update(key: key, item: item),
+          throwsA(
+            isA<DetaItemNotFoundException>()
+                .having((e) => e.message, 'message', 'Key not found'),
+          ),
+        );
+      });
+
+      test('should throw `DetaException` when updating or deleting the key ',
+          () async {
+        final data = {'key': key, 'user': item};
+
+        when(
+          () => mockDio.patch<Map<String, dynamic>>(
+            Uri.encodeComponent('$tUrl/$key'),
+            options: any(named: 'options'),
+            data: {'set': data},
+          ),
+        ).thenThrow(
+          DioError(
+            requestOptions: RequestOptions(
+              path: Uri.encodeComponent('$tUrl/$key'),
+            ),
+            response: Response<Map<String, dynamic>>(
+              data: <String, dynamic>{
+                'errors': ['Bad Request: Can not update the key']
+              },
+              statusCode: 400,
+              requestOptions: RequestOptions(
+                path: Uri.encodeComponent('$tUrl/$key'),
+              ),
+            ),
+            error: DioErrorType.response,
+          ),
+        );
+
+        final base = tDeta.base(tBaseName);
+
+        expect(
+          () => base.update(key: key, item: data),
+          throwsA(
+            isA<DetaException>().having(
+              (e) => e.message,
+              'message',
+              'Bad Request: Can not update the key',
+            ),
+          ),
+        );
+      });
+    });
   });
 }

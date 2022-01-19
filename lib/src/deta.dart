@@ -73,7 +73,17 @@ abstract class DetaBase {
   Future<bool> delete(String key);
 
   /// Updates an item in the database.
-  Future<Map> update({required String key, required Object value});
+  ///
+  /// NOTE: In case you want to update only one parameter of your saved object,
+  /// you must pass a new copy of the object with the updated values.
+  ///
+  /// Example:
+  /// ```dart
+  /// await deta.base('my_base').update('my_key', {'name': 'John Doe'});
+  /// ```
+  ///
+  /// Throw [DetaException] when a bad request occurs.
+  Future<Map> update({required String key, required Map item});
 }
 
 /// Base URL for Deta API.
@@ -254,10 +264,37 @@ class _DetaBase extends DetaBase {
   }
 
   @override
-  Future<Map<String, dynamic>> update(
-      {required String key, required Object value}) {
-    // TODO: implement update
-    throw UnimplementedError();
+  Future<Map<String, dynamic>> update({
+    required String key,
+    required Map item,
+  }) async {
+    if (key.isEmpty) {
+      throw const DetaException(message: 'Key cannot be empty');
+    }
+
+    if (item.containsKey('key')) {
+      item.remove('key');
+    }
+
+    try {
+      final response = await dio.patch<Map<String, dynamic>>(
+        Uri.encodeComponent(
+          '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items/$key',
+        ),
+        options: _authorizationHeader(),
+        data: {'set': item},
+      );
+
+      if (response.data != null) {
+        final resultUpdate =
+            response.data!.cast<String, Map<String, dynamic>>();
+
+        return resultUpdate['set']!;
+      }
+    } on DioError catch (e) {
+      throw _handleError(e);
+    }
+    throw const DetaException();
   }
 
   @override
@@ -300,8 +337,16 @@ class _DetaBase extends DetaBase {
     if (e.response != null) {
       if (e.response!.statusCode == 404) {
         final data = e.response!.data as Map<String, dynamic>;
-        final key = (data.cast<String, Object>())['key'];
-        return DetaItemNotFoundException(message: 'Key $key was not found');
+
+        final map = data.cast<String, Object>();
+        if (map.containsKey('key')) {
+          return DetaItemNotFoundException(
+            message: 'Key ${map['key']} was not found',
+          );
+        } else {
+          final message = (data.cast<String, List<String>>())['errors']!.first;
+          return DetaItemNotFoundException(message: message);
+        }
       }
 
       final data = e.response!.data as Map<String, dynamic>;
