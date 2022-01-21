@@ -381,22 +381,14 @@ void main() {
             tUrl,
             options: any(named: 'options'),
             data: <String, dynamic>{
-              'items': [
-                {'key': key, 'value': value}
-              ]
+              'item': <String, dynamic>{'key': key, 'value': value}
             },
           ),
         ).thenAnswer(
           (_) async => Response(
             data: <String, dynamic>{
-              'processed': <String, dynamic>{
-                'items': <dynamic>[
-                  {
-                    'key': key,
-                    'value': value,
-                  }
-                ]
-              }
+              'key': key,
+              'value': value,
             },
             statusCode: 201,
             requestOptions: RequestOptions(path: tUrl),
@@ -415,9 +407,7 @@ void main() {
             tUrl,
             options: any(named: 'options'),
             data: <String, dynamic>{
-              'items': <dynamic>[
-                {'value': 'hello'}
-              ]
+              'item': <String, dynamic>{'value': 'hello'}
             },
           ),
         ).thenThrow(

@@ -56,10 +56,17 @@ abstract class DetaBase {
   /// Stores an item in the database but raises an error if the key
   /// already exists.
   ///
-  /// Throw [DetaObjectException] if key already exists.
+  /// Note: The object to save must contain a key as parameter.
   ///
-  /// Note that it checks if the item exists before saving
-  /// to the db, consequently it is slower than [put].
+  /// Example:
+  /// ```json
+  ///  {
+  ///   "key": "my-key",
+  ///   "name": "Jhon Doe",
+  ///   "age": 30
+  ///  }
+  /// ```
+  /// Throw [DetaObjectException] if key already exists.
   Future<Map<String, dynamic>> insert(Object item, {String? key});
 
   /// Retrieves an item from the database by its key.
@@ -211,16 +218,12 @@ class _DetaBase extends DetaBase {
       final response = await dio.post<Map<String, dynamic>>(
         '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items',
         options: _authorizationHeader(),
-        data: {
-          'items': [map],
+        data: <String, dynamic>{
+          'item': map,
         },
       );
 
-      if (response.data != null) {
-        final responseData = _castResponse(response.data!);
-
-        return responseData['items']![0];
-      }
+      if (response.data != null) return response.data!;
     } on DioError catch (e) {
       throw _handleError(e);
     }
