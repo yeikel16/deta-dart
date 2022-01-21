@@ -1,6 +1,8 @@
 import 'package:deta/src/exceptions.dart';
 import 'package:dio/dio.dart';
 
+part 'deta_query.dart';
+
 /// {@template deta}
 /// The `Deta` library is the simple way to interact with the
 /// services of the free clud on the [Deta](https://docs.deta.sh/) plataform.
@@ -65,7 +67,58 @@ abstract class DetaBase {
 
   /// Retrieves multiple items from the database based on the
   /// provided (optional) filters.
-  Future<Map<String, dynamic>> fetch(Map<String, dynamic> filters);
+  ///
+  /// The [query] is list of [DetaQuery]. If omitted, you will get all the
+  /// items in the database (up to 1mb or max 1000 items).
+  /// The [limit] of the number of items you want to retreive, min value is 1.
+  /// The [last] key seen in a previous paginated response.
+  ///
+  /// Throw [DetaException] if a query is made on the key.
+  /// Throw [DetaException] if [limit] is less than 1.
+  ///
+  /// Example:
+  /// ```dart
+  /// final result await deta.base('my_base').fetch(
+  ///   query: [DetaQuery('name').equalTo('Jhon')],
+  /// );
+  /// ```
+  ///
+  /// If you have a complex object which contains more objects,
+  /// and you want to do the search by the parameters of the object
+  /// that is inside another one, you can access it in a hierarchical way.
+  ///
+  /// Object User:
+  ///
+  /// ```json
+  /// {
+  ///   "key": "user-a",
+  ///   "user": {
+  ///     "username": "bev",
+  ///     "profile": {
+  ///       "age": 22,
+  ///       "active": true,
+  ///       "name": "Beverly"
+  ///     },
+  ///     "likes":["anime", "ramen"],
+  ///     "purchases": 3
+  ///   }
+  /// }
+  /// ```
+  /// You can search by `name` and `age` in `profile` object like this:
+  ///
+  /// ```dart
+  /// final result await deta.base('my_base').fetch(
+  ///   query: [
+  ///     DetaQuery('user.profile.age')
+  ///       .equalTo(22).and('user.profile.name').equalTo('Beverly'),
+  ///     ], limit: 10,
+  ///   );
+  ///```
+  Future<Map<String, dynamic>> fetch({
+    List<DetaQuery> query = const [],
+    int limit = 1000,
+    String last = '',
+  });
 
   /// Deletes an item from the database.
   ///
@@ -319,9 +372,34 @@ class _DetaBase extends DetaBase {
   }
 
   @override
-  Future<Map<String, dynamic>> fetch(Map<String, dynamic> filters) {
-    // TODO: implement fetch
-    throw UnimplementedError();
+  Future<Map<String, dynamic>> fetch({
+    List<DetaQuery> query = const [],
+    int limit = 1000,
+    String last = '',
+  }) async {
+    final querys = <Map>[];
+
+    if (query.isNotEmpty) {
+      querys.addAll(query.map((e) => e.query));
+    }
+
+    try {
+      final response = await dio.post<Map<String, dynamic>>(
+        '$baseUrl/$apiVersion/${deta.projectId}/$baseName/query',
+        options: _authorizationHeader(),
+        data: {'query': querys, 'limit': limit, 'last': last},
+      );
+
+      if (response.data != null) {
+        // final resultUpdate =
+        //     response.data!.cast<String, Map<String, dynamic>>();
+
+        return response.data!;
+      }
+    } on DioError catch (e) {
+      throw _handleError(e);
+    }
+    throw const DetaException();
   }
 
   Options _authorizationHeader() {

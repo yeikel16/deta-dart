@@ -12,6 +12,7 @@ void main() {
   const tProjectId = 'project_id';
   const tProjectKey = 'project_key';
   const tBaseName = 'base_name';
+  const tUrlBase = 'https://database.deta.sh/v1/$tProjectId/$tBaseName';
   const tUrl = 'https://database.deta.sh/v1/$tProjectId/$tBaseName/items';
 
   setUpAll(() {
@@ -681,6 +682,154 @@ void main() {
               (e) => e.message,
               'message',
               'Bad Request: Can not update the key',
+            ),
+          ),
+        );
+      });
+    });
+
+    group('fetch', () {
+      const key = '100';
+      const item = {'key': key, 'name': 'deta', 'email': 'hello@deta.sh'};
+      const response = {
+        'paging': {'size': 1, 'last': ''},
+        'items': [item]
+      };
+
+      final detaQuery1 = DetaQuery('name').equalTo('Jhon');
+      final detaQuery2 = DetaQuery('age').notEqualTo(24);
+
+      const limit = 10;
+      const last = 'last';
+
+      test('all items when no parameters are passed', () async {
+        when(
+          () => mockDio.post<Map<String, dynamic>>(
+            '$tUrlBase/query',
+            options: any(named: 'options'),
+            data: {
+              'query': <Map<String, dynamic>>[],
+              'limit': 1000,
+              'last': ''
+            },
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: response,
+            statusCode: 200,
+            requestOptions: RequestOptions(path: '$tUrlBase/query'),
+          ),
+        );
+
+        final base = tDeta.base(tBaseName);
+        final result = await base.fetch();
+
+        expect(result, equals(response));
+      });
+
+      test('some item when using the `query`', () async {
+        when(
+          () => mockDio.post<Map<String, dynamic>>(
+            '$tUrlBase/query',
+            options: any(named: 'options'),
+            data: {
+              'query': <Map<String, dynamic>>[
+                detaQuery1.query,
+                detaQuery2.query
+              ],
+              'limit': limit,
+              'last': last
+            },
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: response,
+            statusCode: 200,
+            requestOptions: RequestOptions(path: '$tUrlBase/query'),
+          ),
+        );
+
+        final base = tDeta.base(tBaseName);
+        final result = await base.fetch(
+          query: [detaQuery1, detaQuery2],
+          limit: limit,
+          last: last,
+        );
+
+        expect(result, equals(response));
+      });
+
+      test(
+          'should throw `DetaException` '
+          'when `limit` is less than 1', () async {
+        when(
+          () => mockDio.post<Map<String, dynamic>>(
+            '$tUrlBase/query',
+            options: any(named: 'options'),
+            data: {'query': <Map<String, dynamic>>[], 'limit': 0, 'last': ''},
+          ),
+        ).thenThrow(
+          DioError(
+            requestOptions: RequestOptions(path: '$tUrlBase/query'),
+            response: Response<Map<String, dynamic>>(
+              data: <String, dynamic>{
+                'errors': ['Limit min value 1']
+              },
+              statusCode: 400,
+              requestOptions: RequestOptions(path: '$tUrlBase/query'),
+            ),
+            error: DioErrorType.response,
+          ),
+        );
+
+        final base = tDeta.base(tBaseName);
+
+        expect(
+          () => base.fetch(limit: 0),
+          throwsA(
+            isA<DetaException>()
+                .having((e) => e.message, 'message', 'Limit min value 1'),
+          ),
+        );
+      });
+
+      test('should throw `DetaException` when query is made on the key ',
+          () async {
+        final wrongQuery = DetaQuery('key').equalTo('key');
+
+        when(
+          () => mockDio.post<Map<String, dynamic>>(
+            '$tUrlBase/query',
+            options: any(named: 'options'),
+            data: {
+              'query': <Map<String, dynamic>>[wrongQuery.query],
+              'limit': 1000,
+              'last': ''
+            },
+          ),
+        ).thenThrow(
+          DioError(
+            requestOptions: RequestOptions(path: '$tUrlBase/query'),
+            response: Response<Map<String, dynamic>>(
+              data: <String, dynamic>{
+                'errors': ['Bad query']
+              },
+              statusCode: 400,
+              requestOptions: RequestOptions(path: '$tUrlBase/query'),
+            ),
+            error: DioErrorType.response,
+          ),
+        );
+
+        final base = tDeta.base(tBaseName);
+
+        expect(
+          () => base.fetch(query: [wrongQuery]),
+          throwsA(
+            isA<DetaException>().having(
+              (e) => e.message,
+              'message',
+              'Bad query',
             ),
           ),
         );
