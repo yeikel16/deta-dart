@@ -187,9 +187,9 @@ class _DetaBase extends DetaBase {
       );
 
       if (response.data != null) {
-        final responseData = response.data!.cast<String, Map<String, List>>();
+        final responseData = _castResponse(response.data!);
 
-        return responseData['processed']!['items']![0] as Map<String, dynamic>;
+        return responseData['items']![0];
       }
     } on DioError catch (e) {
       throw _handleError(e);
@@ -217,9 +217,9 @@ class _DetaBase extends DetaBase {
       );
 
       if (response.data != null) {
-        final responseData = response.data!.cast<String, Map<String, List>>();
+        final responseData = _castResponse(response.data!);
 
-        return responseData['processed']!['items']![0] as Map<String, dynamic>;
+        return responseData['items']![0];
       }
     } on DioError catch (e) {
       throw _handleError(e);
@@ -256,11 +256,9 @@ class _DetaBase extends DetaBase {
       );
 
       if (response.data != null) {
-        final responseData = response.data!.cast<String, Map<String, List>>();
+        final responseData = _castResponse(response.data!);
 
-        return List<Map<String, dynamic>>.from(
-          responseData['processed']!['items']!,
-        );
+        return responseData['items']!;
       }
     } on DioError catch (e) {
       throw _handleError(e);
@@ -391,9 +389,6 @@ class _DetaBase extends DetaBase {
       );
 
       if (response.data != null) {
-        // final resultUpdate =
-        //     response.data!.cast<String, Map<String, dynamic>>();
-
         return response.data!;
       }
     } on DioError catch (e) {
@@ -406,7 +401,7 @@ class _DetaBase extends DetaBase {
     return Options(
       headers: <String, dynamic>{
         'Accept': 'application/json',
-        'X-API-Key': deta.projectId,
+        'X-API-Key': deta.projectKey,
       },
     );
   }
@@ -422,13 +417,14 @@ class _DetaBase extends DetaBase {
             message: 'Key ${map['key']} was not found',
           );
         } else {
-          final message = (data.cast<String, List<String>>())['errors']!.first;
+          final message = _castListTo<String>(data)['errors']!.first;
           return DetaItemNotFoundException(message: message);
         }
       }
 
       final data = e.response!.data as Map<String, dynamic>;
-      final message = (data.cast<String, List<String>>())['errors']!.first;
+
+      final message = _castListTo<String>(data)['errors']!.first;
 
       if (e.response!.statusCode == 400) {
         return DetaException(message: message);
@@ -441,5 +437,18 @@ class _DetaBase extends DetaBase {
       }
     }
     return const DetaException();
+  }
+
+  Map<String, List<E>> _castListTo<E>(Map<String, dynamic> itemMap) => itemMap
+      .cast<String, List>()
+      .map((key, value) => MapEntry(key, value.cast<E>()));
+
+  Map<String, List<Map<String, dynamic>>> _castResponse(
+    Map<String, dynamic> data,
+  ) {
+    final castToMap = data.cast<String, Map<String, dynamic>>();
+    final responseData =
+        _castListTo<Map<String, dynamic>>(castToMap['processed']!);
+    return responseData;
   }
 }

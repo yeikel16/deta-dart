@@ -37,15 +37,15 @@ void main() {
     }
 
     when(
-      () => mockDio.put<Map<String, Map<String, List>>>(
+      () => mockDio.put<Map<String, dynamic>>(
         tUrl,
         options: any(named: 'options'),
         data: {'items': items},
       ),
     ).thenAnswer(
       (_) async => Response(
-        data: <String, Map<String, List>>{
-          'processed': {
+        data: <String, dynamic>{
+          'processed': <String, dynamic>{
             'items': <dynamic>[
               {
                 if (key != null) 'key': key else 'key': '8vxiwhhad06m',
@@ -191,7 +191,7 @@ void main() {
             ),
             response: Response<Map<String, dynamic>>(
               data: <String, dynamic>{
-                'errors': <String>['Bad item']
+                'errors': <dynamic>['Bad item']
               },
               statusCode: 400,
               requestOptions: RequestOptions(
@@ -236,7 +236,7 @@ void main() {
             ),
             response: Response<Map<String, dynamic>>(
               data: <String, dynamic>{
-                'errors': ['Unauthorized']
+                'errors': <dynamic>['Unauthorized']
               },
               statusCode: 401,
               requestOptions: RequestOptions(
@@ -295,7 +295,7 @@ void main() {
       });
 
       test('should return a list of items save in DB', () async {
-        final answer = <dynamic>[
+        const answer = <dynamic>[
           {
             'key': '8vxiwhhad06m',
             'value': 'hello',
@@ -307,15 +307,15 @@ void main() {
         ];
 
         when(
-          () => mockDio.put<Map<String, Map<String, List>>>(
+          () => mockDio.put<Map<String, dynamic>>(
             tUrl,
             options: any(named: 'options'),
             data: {'items': itemsMap},
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: <String, Map<String, List>>{
-              'processed': {'items': answer}
+            data: <String, dynamic>{
+              'processed': <String, dynamic>{'items': answer}
             },
             statusCode: 207,
             requestOptions: RequestOptions(
@@ -337,7 +337,7 @@ void main() {
           'should throw `DetaUnauthorizedException`when the call '
           'is not authorized', () {
         when(
-          () => mockDio.put<Map<String, Map<String, List>>>(
+          () => mockDio.put<Map<String, dynamic>>(
             tUrl,
             options: any(named: 'options'),
             data: {'items': itemsMap},
@@ -349,7 +349,7 @@ void main() {
             ),
             response: Response<Map<String, dynamic>>(
               data: <String, dynamic>{
-                'errors': ['Unauthorized']
+                'errors': <dynamic>['Unauthorized']
               },
               statusCode: 401,
               requestOptions: RequestOptions(
@@ -377,10 +377,10 @@ void main() {
         const value = 16;
 
         when(
-          () => mockDio.post<Map<String, Map<String, List>>>(
+          () => mockDio.post<Map<String, dynamic>>(
             tUrl,
             options: any(named: 'options'),
-            data: {
+            data: <String, dynamic>{
               'items': [
                 {'key': key, 'value': value}
               ]
@@ -388,8 +388,8 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: <String, Map<String, List>>{
-              'processed': {
+            data: <String, dynamic>{
+              'processed': <String, dynamic>{
                 'items': <dynamic>[
                   {
                     'key': key,
@@ -399,9 +399,7 @@ void main() {
               }
             },
             statusCode: 201,
-            requestOptions: RequestOptions(
-              path: tUrl,
-            ),
+            requestOptions: RequestOptions(path: tUrl),
           ),
         );
 
@@ -413,11 +411,11 @@ void main() {
 
       test('should throw `DetaObjectException`when the key already exists', () {
         when(
-          () => mockDio.post<Map<String, Map<String, List>>>(
+          () => mockDio.post<Map<String, dynamic>>(
             tUrl,
             options: any(named: 'options'),
-            data: {
-              'items': [
+            data: <String, dynamic>{
+              'items': <dynamic>[
                 {'value': 'hello'}
               ]
             },
@@ -429,7 +427,7 @@ void main() {
             ),
             response: Response<Map<String, dynamic>>(
               data: <String, dynamic>{
-                'errors': ['Key already exists']
+                'errors': <dynamic>['Key already exists']
               },
               statusCode: 409,
               requestOptions: RequestOptions(
@@ -480,7 +478,7 @@ void main() {
           'should throw `DetaItemNotFoundException` when the key is not exists',
           () {
         when(
-          () => mockDio.get<Map<String, Map<String, List>>>(
+          () => mockDio.get<Map<String, dynamic>>(
             Uri.encodeComponent('$tUrl/$key'),
             options: any(named: 'options'),
           ),
@@ -623,7 +621,7 @@ void main() {
             ),
             response: Response<Map<String, dynamic>>(
               data: <String, dynamic>{
-                'errors': ['Key not found']
+                'errors': <dynamic>['Key not found']
               },
               statusCode: 404,
               requestOptions: RequestOptions(
@@ -662,7 +660,7 @@ void main() {
             ),
             response: Response<Map<String, dynamic>>(
               data: <String, dynamic>{
-                'errors': ['Bad Request: Can not update the key']
+                'errors': <dynamic>['Bad Request: Can not update the key']
               },
               statusCode: 400,
               requestOptions: RequestOptions(
@@ -691,7 +689,7 @@ void main() {
     group('fetch', () {
       const key = '100';
       const item = {'key': key, 'name': 'deta', 'email': 'hello@deta.sh'};
-      const response = {
+      const response = <String, dynamic>{
         'paging': {'size': 1, 'last': ''},
         'items': [item]
       };
@@ -773,7 +771,7 @@ void main() {
             requestOptions: RequestOptions(path: '$tUrlBase/query'),
             response: Response<Map<String, dynamic>>(
               data: <String, dynamic>{
-                'errors': ['Limit min value 1']
+                'errors': <dynamic>['Limit min value 1']
               },
               statusCode: 400,
               requestOptions: RequestOptions(path: '$tUrlBase/query'),
@@ -812,7 +810,7 @@ void main() {
             requestOptions: RequestOptions(path: '$tUrlBase/query'),
             response: Response<Map<String, dynamic>>(
               data: <String, dynamic>{
-                'errors': ['Bad query']
+                'errors': <dynamic>['Bad query']
               },
               statusCode: 400,
               requestOptions: RequestOptions(path: '$tUrlBase/query'),
