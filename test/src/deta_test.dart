@@ -443,7 +443,7 @@ void main() {
       test('a stored item when the key is valid', () async {
         when(
           () => mockDio.get<Map<String, dynamic>>(
-            Uri.encodeComponent('$tUrl/$key'),
+            '$tUrl/${Uri.encodeComponent(key)}',
             options: any(named: 'options'),
           ),
         ).thenAnswer(
@@ -453,7 +453,7 @@ void main() {
             },
             statusCode: 200,
             requestOptions: RequestOptions(
-              path: Uri.encodeComponent('$tUrl/$key'),
+              path: '$tUrl/${Uri.encodeComponent(key)}',
             ),
           ),
         );
@@ -469,19 +469,19 @@ void main() {
           () {
         when(
           () => mockDio.get<Map<String, dynamic>>(
-            Uri.encodeComponent('$tUrl/$key'),
+            '$tUrl/${Uri.encodeComponent(key)}',
             options: any(named: 'options'),
           ),
         ).thenThrow(
           DioError(
             requestOptions: RequestOptions(
-              path: Uri.encodeComponent('$tUrl/$key'),
+              path: '$tUrl/${Uri.encodeComponent(key)}',
             ),
             response: Response<Map<String, dynamic>>(
               data: <String, dynamic>{'key': key},
               statusCode: 404,
               requestOptions: RequestOptions(
-                path: Uri.encodeComponent('$tUrl/$key'),
+                path: '$tUrl/${Uri.encodeComponent(key)}',
               ),
             ),
             error: DioErrorType.response,
@@ -506,8 +506,8 @@ void main() {
       const key = '100';
       test('a stored item', () async {
         when(
-          () => mockDio.get<Map<String, dynamic>>(
-            Uri.encodeComponent('$tUrl/$key'),
+          () => mockDio.delete<Map<String, dynamic>>(
+            '$tUrl/${Uri.encodeComponent(key)}',
             options: any(named: 'options'),
           ),
         ).thenAnswer(
@@ -517,7 +517,7 @@ void main() {
             },
             statusCode: 200,
             requestOptions: RequestOptions(
-              path: Uri.encodeComponent('$tUrl/$key'),
+              path: '$tUrl/${Uri.encodeComponent(key)}',
             ),
           ),
         );
@@ -531,20 +531,20 @@ void main() {
       test('should throw `DetaException` when occurs an error in the call.',
           () async {
         when(
-          () => mockDio.get<Map<String, dynamic>>(
-            Uri.encodeComponent('$tUrl/$key'),
+          () => mockDio.delete<Map<String, dynamic>>(
+            '$tUrl/${Uri.encodeComponent(key)}',
             options: any(named: 'options'),
           ),
         ).thenThrow(
           DioError(
             requestOptions: RequestOptions(
-              path: Uri.encodeComponent('$tUrl/$key'),
+              path: '$tUrl/${Uri.encodeComponent(key)}',
             ),
             response: Response<Map<String, dynamic>>(
               data: <String, dynamic>{'key': key},
               statusCode: 400,
               requestOptions: RequestOptions(
-                path: Uri.encodeComponent('$tUrl/$key'),
+                path: '$tUrl/${Uri.encodeComponent(key)}',
               ),
             ),
             error: DioErrorType.response,
@@ -563,7 +563,7 @@ void main() {
       test('a stored item', () async {
         when(
           () => mockDio.patch<Map<String, dynamic>>(
-            Uri.encodeComponent('$tUrl/$key'),
+            '$tUrl/${Uri.encodeComponent(key)}',
             options: any(named: 'options'),
             data: {'set': item},
           ),
@@ -572,7 +572,7 @@ void main() {
             data: <String, dynamic>{'key': key, 'set': item},
             statusCode: 200,
             requestOptions: RequestOptions(
-              path: Uri.encodeComponent('$tUrl/$key'),
+              path: '$tUrl/${Uri.encodeComponent(key)}',
             ),
           ),
         );
@@ -600,14 +600,14 @@ void main() {
           'when the key does not exist', () async {
         when(
           () => mockDio.patch<Map<String, dynamic>>(
-            Uri.encodeComponent('$tUrl/$key'),
+            '$tUrl/${Uri.encodeComponent(key)}',
             options: any(named: 'options'),
             data: {'set': item},
           ),
         ).thenThrow(
           DioError(
             requestOptions: RequestOptions(
-              path: Uri.encodeComponent('$tUrl/$key'),
+              path: '$tUrl/${Uri.encodeComponent(key)}',
             ),
             response: Response<Map<String, dynamic>>(
               data: <String, dynamic>{
@@ -615,7 +615,7 @@ void main() {
               },
               statusCode: 404,
               requestOptions: RequestOptions(
-                path: Uri.encodeComponent('$tUrl/$key'),
+                path: '$tUrl/${Uri.encodeComponent(key)}',
               ),
             ),
             error: DioErrorType.response,
@@ -639,14 +639,14 @@ void main() {
 
         when(
           () => mockDio.patch<Map<String, dynamic>>(
-            Uri.encodeComponent('$tUrl/$key'),
+            '$tUrl/${Uri.encodeComponent(key)}',
             options: any(named: 'options'),
             data: {'set': data},
           ),
         ).thenThrow(
           DioError(
             requestOptions: RequestOptions(
-              path: Uri.encodeComponent('$tUrl/$key'),
+              path: '$tUrl/${Uri.encodeComponent(key)}',
             ),
             response: Response<Map<String, dynamic>>(
               data: <String, dynamic>{
@@ -654,7 +654,7 @@ void main() {
               },
               statusCode: 400,
               requestOptions: RequestOptions(
-                path: Uri.encodeComponent('$tUrl/$key'),
+                path: '$tUrl/${Uri.encodeComponent(key)}',
               ),
             ),
             error: DioErrorType.response,

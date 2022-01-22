@@ -302,9 +302,7 @@ class _DetaBase extends DetaBase {
   Future<Map<String, dynamic>> get(String key) async {
     try {
       final response = await dio.get<Map<String, dynamic>>(
-        Uri.encodeComponent(
-          '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items/$key',
-        ),
+        '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items/${Uri.encodeComponent(key)}',
         options: _authorizationHeader(),
       );
 
@@ -332,9 +330,7 @@ class _DetaBase extends DetaBase {
 
     try {
       final response = await dio.patch<Map<String, dynamic>>(
-        Uri.encodeComponent(
-          '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items/$key',
-        ),
+        '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items/${Uri.encodeComponent(key)}',
         options: _authorizationHeader(),
         data: {'set': item},
       );
@@ -354,10 +350,8 @@ class _DetaBase extends DetaBase {
   @override
   Future<bool> delete(String key) async {
     try {
-      final response = await dio.get<Map<String, dynamic>>(
-        Uri.encodeComponent(
-          '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items/$key',
-        ),
+      final response = await dio.delete<Map<String, dynamic>>(
+        '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items/${Uri.encodeComponent(key)}',
         options: _authorizationHeader(),
       );
 
