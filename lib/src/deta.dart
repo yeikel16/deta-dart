@@ -23,7 +23,9 @@ class Deta {
   /// Dio instance.
   final Dio dio;
 
-  /// Returns a new instance of the `DetaBase` from the `baseName.`
+  /// Connect to a `DetaBase` from `baseName`.
+  ///
+  /// In case not exist it will be created instantly on first use
   DetaBase base(String baseName) => _DetaBase(
         dio: dio,
         deta: this,
