@@ -1,7 +1,8 @@
 name: deta
-description: A Very Good Project created by Very Good CLI.
-version: 1.0.0+1
-publish_to: none
+description: A Dart package to interact with the HTTP API of the free services of the Deta plataform.
+version: 0.0.1-beta
+repository: https://github.com/yeikel16/deta-dart
+homepage: https://github.com/yeikel16/deta-dart
 
 environment:
   sdk: ">=2.14.0 <3.0.0"
