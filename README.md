@@ -1,6 +1,6 @@
 # Deta
 
-[![style: very good analysis][very_good_analysis_badge]][very_good_analysis_link]   [![License: MIT][license_badge]][license_link]  [![coverage][coverage_badge]][ci_link]
+[![style: very good analysis][very_good_analysis_badge]][very_good_analysis_link]   [![License: MIT][license_badge]][license_link] [![codecov][coverage_badge]][codecov_link]
 
 ---
 
@@ -140,8 +140,8 @@ Return all element that matched the indicated `query`.
 
 A Very Good Project created by [Very Good CLI](https://github.com/VeryGoodOpenSource/very_good_cli).
 
-[ci_link]: https://github.com/VeryGoodOpenSource/very_good_cli/actions
-[coverage_badge]: https://raw.githubusercontent.com/VeryGoodOpenSource/very_good_cli/main/coverage_badge.svg
+[codecov_link]: https://codecov.io/gh/yeikel16/deta-dart
+[coverage_badge]: https://codecov.io/gh/yeikel16/deta-dart/branch/main/graph/badge.svg
 [license_badge]: https://img.shields.io/badge/license-MIT-blue.svg
 [license_link]: https://opensource.org/licenses/MIT
 [logo]: https://docs.deta.sh/img/logo.svg
