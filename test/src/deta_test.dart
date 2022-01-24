@@ -9,19 +9,15 @@ class MockDio extends Mock implements Dio {}
 void main() {
   late final Deta tDeta;
   late Dio mockDio;
-  const tProjectId = 'project_id';
-  const tProjectKey = 'project_key';
+  const tProjectId = 'project-id';
+  const tProjectKey = '${tProjectId}_key';
   const tBaseName = 'base_name';
   const tUrlBase = 'https://database.deta.sh/v1/$tProjectId/$tBaseName';
   const tUrl = 'https://database.deta.sh/v1/$tProjectId/$tBaseName/items';
 
   setUpAll(() {
     mockDio = MockDio();
-    tDeta = Deta(
-      projectId: tProjectId,
-      projectKey: tProjectKey,
-      dio: mockDio,
-    );
+    tDeta = Deta(projectKey: tProjectKey, dio: mockDio);
   });
 
   void whenPutEspecificType<E>(E data, {String? key}) {
@@ -65,6 +61,10 @@ void main() {
   group('Deta', () {
     test('can be instantiated', () {
       expect(tDeta, isNotNull);
+    });
+
+    test('get project id from proyect key parameter', () {
+      expect(tProjectId, tDeta.projectId);
     });
   });
 

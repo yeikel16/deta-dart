@@ -10,15 +10,14 @@ part 'deta_query.dart';
 class Deta {
   /// {@macro deta}
   Deta({
-    required this.projectId,
     required this.projectKey,
     required this.dio,
-  });
+  }) : projectId = projectKey.split('_')[0];
 
-  /// The `projectId` must to be provided for authentication.
+  /// Project identifier.
   final String projectId;
 
-  /// The proyect id.
+  /// Must to be provided for authentication.
   final String projectKey;
 
   /// Dio instance.
