@@ -1,6 +1,6 @@
 # Deta
 
-[![style: very good analysis][very_good_analysis_badge]][very_good_analysis_link]   [![License: MIT][license_badge]][license_link] [![codecov][coverage_badge]][codecov_link]
+[![codecov][coverage_badge]][codecov_link]  [![style: very good analysis][very_good_analysis_badge]][very_good_analysis_link]   [![pub package][pub_badge]][pub_link]   [![License: MIT][license_badge]][license_link]
 
 ---
 
@@ -16,9 +16,7 @@ Add to dependencies on `pubspec.yaml`:
 
 ```yaml
 dependencies:
-    deta:
-        git:
-            url: https://github.com/yeikel16/deta-dart.git
+    deta: <version>
 ```
 
 ### Usege
@@ -143,6 +141,8 @@ A Very Good Project created by [Very Good CLI](https://github.com/VeryGoodOpenSo
 [codecov_link]: https://codecov.io/gh/yeikel16/deta-dart
 [coverage_badge]: https://codecov.io/gh/yeikel16/deta-dart/branch/main/graph/badge.svg
 [license_badge]: https://img.shields.io/badge/license-MIT-blue.svg
+[pub_badge]: https://img.shields.io/pub/v/deta.svg
+[pub_link]: https://pub.dartlang.org/packages/deta
 [license_link]: https://opensource.org/licenses/MIT
 [logo]: https://docs.deta.sh/img/logo.svg
 [very_good_analysis_badge]: https://img.shields.io/badge/style-very_good_analysis-B22C89.svg
