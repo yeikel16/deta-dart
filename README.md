@@ -136,6 +136,34 @@ Return all element that matched the indicated `query`.
   );
   ```
 
+---
+
+## Running Tests 🧪
+
+To run all unit tests use the following command:
+
+```sh
+flutter test --coverage --test-randomize-ordering-seed random
+
+```
+
+To view the generated coverage report you can use [lcov](https://github.com/linux-test-project/lcov).
+
+```sh
+# Generate Coverage Report
+$ genhtml coverage/lcov.info -o coverage/
+
+# Open Coverage Report in Mac or Linux
+$ open coverage/index.html # 
+```
+
+``` powershell
+# Open Coverage Report in Windows
+ Invoke-Expression coverage/index.html # 
+```
+
+---
+
 A Very Good Project created by [Very Good CLI](https://github.com/VeryGoodOpenSource/very_good_cli).
 
 [codecov_link]: https://codecov.io/gh/yeikel16/deta-dart
