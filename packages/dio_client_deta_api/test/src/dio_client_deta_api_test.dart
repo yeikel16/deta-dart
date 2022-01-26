@@ -1,6 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:client_deta_api/client_deta_api.dart';
-import 'package:deta_dio_client_api/deta_dio_client_api.dart';
+import 'package:deta_dio_client_api/dio_client_deta_api.dart';
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
