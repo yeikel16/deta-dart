@@ -1,13 +1,14 @@
+import 'package:deta_client_api/src/deta_response.dart';
+
 ///{@template deta_error}
-/// Class for error in the request
+/// Class for error in the request.
 /// {@endtemplate}
 class DetaError extends Error {
   /// {@macro deta_error}
-  DetaError({this.statusCode = 400, this.statusMessage = 'Bad request'});
+  DetaError({this.response});
 
-  /// Error code
-  final int statusCode;
-
-  /// Error message
-  final String statusMessage;
+  /// Response info, it may be `null` if the request can't reach to
+  /// the http server, for example, occurring a dns error,
+  /// network is not available.
+  DetaResponse? response;
 }
