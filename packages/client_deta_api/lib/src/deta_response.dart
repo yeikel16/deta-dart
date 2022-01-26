@@ -3,7 +3,7 @@
 /// {@endtemplate}
 class DetaResponse<T> {
   /// {@macro deta_response}
-  DetaResponse(this.body, this.statusCode);
+  DetaResponse({this.body, this.statusCode});
 
   /// Response body.
   final T? body;
