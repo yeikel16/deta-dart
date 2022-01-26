@@ -3,7 +3,7 @@
 [![style: very good analysis][very_good_analysis_badge]][very_good_analysis_link]
 [![License: MIT][license_badge]][license_link]
 
-Package base interface for the http client.
+Basic interface of requests from a client to interact with the Deta API.
 
 ---
 

@@ -1,7 +1,8 @@
 name: deta_client_api
-description: A Very Good Project created by Very Good CLI.
-version: 1.0.0+1
-publish_to: none
+description: Basic interface of requests from a client to interact with the Deta API.
+version: 0.0.1
+repository: https://github.com/yeikel16/deta-dart
+homepage: https://github.com/yeikel16/deta-dart
 
 environment:
   sdk: ">=2.14.0 <3.0.0"

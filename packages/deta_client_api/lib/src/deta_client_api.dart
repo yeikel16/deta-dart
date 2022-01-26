@@ -1,7 +1,7 @@
 import 'package:deta_client_api/src/deta_response.dart';
 
 /// {@template deta_client_api}
-/// Base interface for the http client
+/// Basic interface of requests from a client to interact with the Deta API.
 /// {@endtemplate}
 abstract class DetaClientApi {
   /// {@endtemplate}
