@@ -1,5 +1,5 @@
-library deta_client_api;
+library client_deta_api;
 
-export 'src/deta_client_api.dart';
+export 'src/client_deta_api.dart';
 export 'src/deta_error.dart';
 export 'src/deta_response.dart';

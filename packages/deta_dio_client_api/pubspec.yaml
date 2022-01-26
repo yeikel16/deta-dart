@@ -8,8 +8,8 @@ environment:
 
 dependencies: 
   dio: ^4.0.4
-  deta_client_api:
-    path: ../deta_client_api
+  client_deta_api:
+    path: ../client_deta_api
   
 dev_dependencies:
   test: ^1.19.2

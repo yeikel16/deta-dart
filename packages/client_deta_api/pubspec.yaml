@@ -1,4 +1,4 @@
-name: deta_client_api
+name: client_deta_api
 description: Basic interface of requests from a client to interact with the Deta API.
 version: 0.0.1
 repository: https://github.com/yeikel16/deta-dart
@@ -8,5 +8,4 @@ environment:
   sdk: ">=2.14.0 <3.0.0"
 
 dev_dependencies:
-  test: ^1.19.2
   very_good_analysis: ^2.4.0

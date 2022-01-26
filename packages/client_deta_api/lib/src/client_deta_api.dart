@@ -1,12 +1,12 @@
-import 'package:deta_client_api/src/deta_response.dart';
+import 'package:client_deta_api/src/deta_response.dart';
 
-/// {@template deta_client_api}
+/// {@template client_deta_api}
 /// Basic interface of requests from a client to interact with the Deta API.
 /// {@endtemplate}
-abstract class DetaClientApi {
+abstract class ClientDetaApi {
   /// {@endtemplate}
-  /// {@macro deta_client_api}
-  const DetaClientApi();
+  /// {@macro client_deta_api}
+  const ClientDetaApi();
 
   /// Make http `GET` request.
   Future<DetaResponse<T>> get<T>(

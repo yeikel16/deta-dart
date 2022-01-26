@@ -1,4 +1,4 @@
-import 'package:deta_client_api/src/deta_response.dart';
+import 'package:client_deta_api/src/deta_response.dart';
 
 ///{@template deta_error}
 /// Class for error in the request.

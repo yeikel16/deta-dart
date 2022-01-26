@@ -1,10 +1,10 @@
-import 'package:deta_client_api/deta_client_api.dart';
+import 'package:client_deta_api/client_deta_api.dart';
 import 'package:dio/dio.dart';
 
 /// {@template deta_dio_client_api}
 /// Deta custom client using [Dio] package for http request.
 /// {@endtemplate}
-class DetaDioClientApi extends DetaClientApi {
+class DetaDioClientApi extends ClientDetaApi {
   /// {@macro deta_dio_client_api}
   const DetaDioClientApi({required Dio dio}) : _dio = dio;
 
