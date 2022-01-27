@@ -1,6 +1,6 @@
 name: deta
 description: A Dart package to interact with the HTTP API of the free services of the Deta plataform.
-version: 0.0.2-beta
+version: 0.0.3
 repository: https://github.com/yeikel16/deta-dart
 homepage: https://github.com/yeikel16/deta-dart
 
@@ -8,7 +8,7 @@ environment:
   sdk: ">=2.14.0 <3.0.0"
 
 dependencies:
-  client_deta_api:  ^0.0.2-dev.1
+  client_deta_api:  ^0.0.2
    
 dev_dependencies:
   mocktail: ^0.2.0
