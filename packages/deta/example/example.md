@@ -1,15 +1,23 @@
-// ignore_for_file: unused_local_variable
+# Example
 
+```dart
 import 'package:deta/deta.dart';
 import 'package:dio/dio.dart';
-import 'package:meta/meta.dart';
+import 'package:dio_client_deta_api/dio_client_deta_api.dart';
+import 'package:equatable/equatable.dart';
 
 const projectKey = 'put-your-proyect-key-here';
 
 Future<void> main(List<String> args) async {
   // We declare class Deta, which receives our private credentials
   // as a parameter.
-  final deta = Deta(projectKey: projectKey, dio: Dio());
+  // You can chouse a client that you want to use,
+  // DioClietnDetaApi or HttpClientDetaApi, remember add to depencencies
+  // the client.
+  final deta = Deta(
+    projectKey: projectKey,
+    client: DioClientDetaApi(dio: Dio()),
+  );
 
   // We define our `DetaBase`, with witch we are going to work from the name.
   // In case `DetaBase`  not exist it will be created instantly on first use,
@@ -60,10 +68,10 @@ Future<void> main(List<String> args) async {
   );
 
   // Get a spesific element form the key.
-  final item = await detabase.get('dart-g');
+  final item = await detabase.get('ruby-ym');
 
   // Delete a spesific element from the key.
-  final wasDeleted = await detabase.delete('ruby');
+  final wasDeleted = await detabase.delete('assembly');
 
   // Return all saved items if no `query` is specified.
   final all = await detabase.fetch();
@@ -73,9 +81,12 @@ Future<void> main(List<String> args) async {
     query: [DetaQuery('year').lessThanOrEqualTo(2000).and('name').prefix('C')],
   );
 }
+```
 
-@immutable
-class Lenguage {
+## Model
+
+```dart
+class Lenguage extends Equatable {
   const Lenguage({
     required this.key,
     required this.name,
@@ -107,29 +118,18 @@ class Lenguage {
       };
 
   @override
-  String toString() =>
-      'ProgramingLenguage(key: $key, name: $name, description: $description, '
-      'creator: $creator, year: $year)';
+  bool? get stringify => true;
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is Lenguage &&
-        other.key == key &&
-        other.name == name &&
-        other.creator == creator &&
-        other.description == description &&
-        other.year == year;
+  List<Object> get props {
+    return [
+      key,
+      name,
+      description,
+      creator,
+      year,
+    ];
   }
-
-  @override
-  int get hashCode =>
-      key.hashCode ^
-      name.hashCode ^
-      description.hashCode ^
-      creator.hashCode ^
-      year.hashCode;
 }
 
 const lenguages = [
@@ -249,3 +249,4 @@ const lenguages = [
     year: 1972,
   )
 ];
+```
