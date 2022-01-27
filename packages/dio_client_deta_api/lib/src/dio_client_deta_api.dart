@@ -2,11 +2,11 @@ import 'package:client_deta_api/client_deta_api.dart';
 import 'package:dio/dio.dart';
 
 /// {@template deta_dio_client_api}
-/// Deta custom client using [Dio] package for http request.
+/// Deta custom API client using [Dio] package for http request.
 /// {@endtemplate}
-class DetaDioClientApi extends ClientDetaApi {
+class DioClientDetaApi extends ClientDetaApi {
   /// {@macro deta_dio_client_api}
-  const DetaDioClientApi({required Dio dio}) : _dio = dio;
+  const DioClientDetaApi({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
@@ -21,7 +21,7 @@ class DetaDioClientApi extends ClientDetaApi {
         options: Options(headers: headers),
       );
 
-      return DetaResponse(response.data, response.statusCode);
+      return DetaResponse(body: response.data, statusCode: response.statusCode);
     } on DioError catch (e) {
       throw _handleError(e);
     }
@@ -40,7 +40,7 @@ class DetaDioClientApi extends ClientDetaApi {
         options: Options(headers: headers),
       );
 
-      return DetaResponse(response.data, response.statusCode);
+      return DetaResponse(body: response.data, statusCode: response.statusCode);
     } on DioError catch (e) {
       throw _handleError(e);
     }
@@ -59,7 +59,7 @@ class DetaDioClientApi extends ClientDetaApi {
         options: Options(headers: headers),
       );
 
-      return DetaResponse(response.data, response.statusCode);
+      return DetaResponse(body: response.data, statusCode: response.statusCode);
     } on DioError catch (e) {
       throw _handleError(e);
     }
@@ -78,7 +78,7 @@ class DetaDioClientApi extends ClientDetaApi {
         options: Options(headers: headers),
       );
 
-      return DetaResponse(response.data, response.statusCode);
+      return DetaResponse(body: response.data, statusCode: response.statusCode);
     } on DioError catch (e) {
       throw _handleError(e);
     }
@@ -97,16 +97,16 @@ class DetaDioClientApi extends ClientDetaApi {
         options: Options(headers: headers),
       );
 
-      return DetaResponse(response.data, response.statusCode);
+      return DetaResponse(body: response.data, statusCode: response.statusCode);
     } on DioError catch (e) {
       throw _handleError(e);
     }
   }
 
-  Error _handleError(DioError e) => DetaError(
+  Exception _handleError(DioError e) => DetaError(
         response: DetaResponse<dynamic>(
-          e.response?.data,
-          e.response?.statusCode,
+          body: e.response?.data,
+          statusCode: e.response?.statusCode,
         ),
       );
 }

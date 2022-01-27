@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:client_deta_api/client_deta_api.dart';
-import 'package:deta_dio_client_api/dio_client_deta_api.dart';
 import 'package:dio/dio.dart';
+import 'package:dio_client_deta_api/dio_client_deta_api.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -9,11 +9,11 @@ class MockDio extends Mock implements Dio {}
 
 void main() {
   late final MockDio mockDio;
-  late final DetaDioClientApi api;
+  late final DioClientDetaApi api;
 
   setUpAll(() {
     mockDio = MockDio();
-    api = DetaDioClientApi(dio: mockDio);
+    api = DioClientDetaApi(dio: mockDio);
   });
 
   setUpAll(() {
@@ -30,7 +30,7 @@ void main() {
 
   group('DetaDioWebApi', () {
     test('can be instantiated', () {
-      expect(DetaDioClientApi(dio: MockDio()), isNotNull);
+      expect(DioClientDetaApi(dio: MockDio()), isNotNull);
     });
 
     group('method `get`', () {

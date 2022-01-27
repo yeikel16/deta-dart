@@ -1,3 +1,3 @@
-library deta_dio_client_api;
+library dio_client_deta_api;
 
 export 'src/dio_client_deta_api.dart';
