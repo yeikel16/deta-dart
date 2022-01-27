@@ -1,6 +1,6 @@
 name: http_client_deta_api
 description: Implementation of the client_deta_api package using the http package.
-version: 0.0.1
+version: 0.0.1+1s
 repository: https://github.com/yeikel16/deta-dart
 homepage: https://github.com/yeikel16/deta-dart
 
