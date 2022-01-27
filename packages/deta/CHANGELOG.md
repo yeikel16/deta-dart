@@ -9,7 +9,7 @@
 * rearrange(deta): move `deta` package to `packages` folder
 * **BREAKING:** implement `ClientDetaApi` from `client_deta_api`
 
-## 0.0.2
+## 0.0.3
 
 * deps: remove unnecessary dependencies
   * `equeatable`
