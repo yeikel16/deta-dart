@@ -1,5 +1,5 @@
+import 'package:client_deta_api/client_deta_api.dart';
 import 'package:deta/src/exceptions.dart';
-import 'package:dio/dio.dart';
 
 part 'deta_query.dart';
 
@@ -11,7 +11,7 @@ class Deta {
   /// {@macro deta}
   Deta({
     required this.projectKey,
-    required this.dio,
+    required this.client,
   }) : projectId = projectKey.split('_')[0];
 
   /// Project identifier.
@@ -20,14 +20,14 @@ class Deta {
   /// Must to be provided for authentication.
   final String projectKey;
 
-  /// Dio instance.
-  final Dio dio;
+  /// Client for http request.
+  final ClientDetaApi client;
 
   /// Connect to a `DetaBase` from `baseName`.
   ///
   /// In case not exist it will be created instantly on first use
   DetaBase base(String baseName) => _DetaBase(
-        dio: dio,
+        client: client,
         deta: this,
         baseName: baseName,
       );
@@ -81,8 +81,8 @@ abstract class DetaBase {
   /// The [limit] of the number of items you want to retreive, min value is 1.
   /// The [last] key seen in a previous paginated response.
   ///
-  /// Throw [DetaException] if a query is made on the key.
-  /// Throw [DetaException] if [limit] is less than 1.
+  /// Throw [DetaException] if a query is made on the key or
+  /// [limit] is less than 1.
   ///
   /// Example:
   /// ```dart
@@ -161,7 +161,7 @@ class _DetaBase extends DetaBase {
   const _DetaBase({
     required this.baseName,
     required this.deta,
-    required this.dio,
+    required this.client,
   });
 
   /// The `baseName` is the name given to your database
@@ -172,8 +172,11 @@ class _DetaBase extends DetaBase {
   // Deta instance.
   final Deta deta;
 
-  /// Dio instance.
-  final Dio dio;
+  /// Client for http request.
+  final ClientDetaApi client;
+
+  Uri get itemsUrl =>
+      Uri.parse('$baseUrl/$apiVersion/${deta.projectId}/$baseName/items');
 
   @override
   Future<Map<String, dynamic>> put(Object item, {String? key}) async {
@@ -186,20 +189,20 @@ class _DetaBase extends DetaBase {
     _checkValidObjectType(item, map);
 
     try {
-      final response = await dio.put<Map<String, dynamic>>(
-        '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items',
-        options: _authorizationHeader(),
+      final response = await client.put<Map<String, dynamic>>(
+        itemsUrl,
+        headers: _authorizationHeader(),
         data: {
           'items': [map],
         },
       );
 
-      if (response.data != null) {
-        final responseData = _castResponse(response.data!);
+      if (response.body != null) {
+        final responseData = _castResponse(response.body!);
 
         return responseData['items']![0];
       }
-    } on DioError catch (e) {
+    } on DetaError catch (e) {
       throw _handleError(e);
     }
     throw const DetaException();
@@ -216,16 +219,16 @@ class _DetaBase extends DetaBase {
     _checkValidObjectType(item, map);
 
     try {
-      final response = await dio.post<Map<String, dynamic>>(
-        '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items',
-        options: _authorizationHeader(),
+      final response = await client.post<Map<String, dynamic>>(
+        itemsUrl,
+        headers: _authorizationHeader(),
         data: <String, dynamic>{
           'item': map,
         },
       );
 
-      if (response.data != null) return response.data!;
-    } on DioError catch (e) {
+      if (response.body != null) return response.body!;
+    } on DetaError catch (e) {
       throw _handleError(e);
     }
     throw const DetaException();
@@ -251,25 +254,153 @@ class _DetaBase extends DetaBase {
     }).toList();
 
     try {
-      final response = await dio.put<Map<String, dynamic>>(
-        '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items',
-        options: _authorizationHeader(),
+      final response = await client.put<Map<String, dynamic>>(
+        itemsUrl,
+        headers: _authorizationHeader(),
         data: {
           'items': result,
         },
       );
 
-      if (response.data != null) {
-        final responseData = _castResponse(response.data!);
+      if (response.body != null) {
+        final responseData = _castResponse(response.body!);
 
         return responseData['items']!;
       }
-    } on DioError catch (e) {
+    } on DetaError catch (e) {
       throw _handleError(e);
     }
     throw const DetaException();
   }
 
+  @override
+  Future<Map<String, dynamic>> get(String key) async {
+    try {
+      final response = await client.get<Map<String, dynamic>>(
+        Uri.parse('${itemsUrl.toString()}/${Uri.encodeComponent(key)}'),
+        headers: _authorizationHeader(),
+      );
+
+      if (response.body != null) {
+        return response.body!.cast<String, dynamic>();
+      }
+    } on DetaError catch (e) {
+      throw _handleError(e);
+    }
+    throw const DetaException();
+  }
+
+  @override
+  Future<Map<String, dynamic>> update({
+    required String key,
+    required Map item,
+  }) async {
+    if (key.isEmpty) {
+      throw const DetaException(message: 'Key cannot be empty');
+    }
+
+    if (item.containsKey('key')) {
+      item.remove('key');
+    }
+
+    try {
+      final response = await client.patch<Map<String, dynamic>>(
+        Uri.parse('${itemsUrl.toString()}/${Uri.encodeComponent(key)}'),
+        headers: _authorizationHeader(),
+        data: {'set': item},
+      );
+
+      if (response.body != null) {
+        final resultUpdate =
+            response.body!.cast<String, Map<String, dynamic>>();
+
+        return resultUpdate['set']!;
+      }
+    } on DetaError catch (e) {
+      throw _handleError(e);
+    }
+    throw const DetaException();
+  }
+
+  @override
+  Future<bool> delete(String key) async {
+    try {
+      final response = await client.delete<Map<String, dynamic>>(
+        Uri.parse('${itemsUrl.toString()}/${Uri.encodeComponent(key)}'),
+        headers: _authorizationHeader(),
+      );
+
+      if (response.body != null) {
+        final responseData = response.body!.cast<String, String>();
+
+        return responseData['key']! == key;
+      }
+    } on DetaError catch (_) {
+      return false;
+    }
+    return false;
+  }
+
+  @override
+  Future<Map<String, dynamic>> fetch({
+    List<DetaQuery> query = const [],
+    int limit = 1000,
+    String last = '',
+  }) async {
+    final querys = <Map>[];
+
+    if (query.isNotEmpty) {
+      querys.addAll(query.map((e) => e.query));
+    }
+
+    try {
+      final response = await client.post<Map<String, dynamic>>(
+        Uri.parse('$baseUrl/$apiVersion/${deta.projectId}/$baseName/query'),
+        headers: _authorizationHeader(),
+        data: {'query': querys, 'limit': limit, 'last': last},
+      );
+
+      if (response.body != null) {
+        return response.body!;
+      }
+    } on DetaError catch (e) {
+      throw _handleError(e);
+    }
+    throw const DetaException();
+  }
+
+  Exception _handleError(DetaError e) {
+    if (e.response != null && e.response?.body != null) {
+      final data = e.response!.body as Map<String, dynamic>;
+
+      if (e.response!.statusCode == 404) {
+        final map = data.cast<String, Object>();
+        if (map.containsKey('key')) {
+          return DetaItemNotFoundException(
+            message: 'Key ${map['key']} was not found',
+          );
+        } else {
+          final message = _castListTo<String>(data)['errors']!.first;
+          return DetaItemNotFoundException(message: message);
+        }
+      }
+
+      final message = _castListTo<String>(data)['errors']!.first;
+
+      if (e.response!.statusCode == 400) {
+        return DetaException(message: message);
+      }
+      if (e.response!.statusCode == 401) {
+        return DetaUnauthorizedException(message: message);
+      }
+      if (e.response!.statusCode == 409) {
+        return DetaObjectException(message: message);
+      }
+    }
+    return const DetaException();
+  }
+
+  /// Check if the object is valid
   bool _checkValidObjectType(Object item, Map<String, dynamic> map) {
     if (item is Map) {
       map.addAll(item as Map<String, dynamic>);
@@ -299,142 +430,12 @@ class _DetaBase extends DetaBase {
     }
   }
 
-  @override
-  Future<Map<String, dynamic>> get(String key) async {
-    try {
-      final response = await dio.get<Map<String, dynamic>>(
-        '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items/${Uri.encodeComponent(key)}',
-        options: _authorizationHeader(),
-      );
-
-      if (response.data != null) {
-        return response.data!.cast<String, dynamic>();
-      }
-    } on DioError catch (e) {
-      throw _handleError(e);
-    }
-    throw const DetaException();
-  }
-
-  @override
-  Future<Map<String, dynamic>> update({
-    required String key,
-    required Map item,
-  }) async {
-    if (key.isEmpty) {
-      throw const DetaException(message: 'Key cannot be empty');
-    }
-
-    if (item.containsKey('key')) {
-      item.remove('key');
-    }
-
-    try {
-      final response = await dio.patch<Map<String, dynamic>>(
-        '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items/${Uri.encodeComponent(key)}',
-        options: _authorizationHeader(),
-        data: {'set': item},
-      );
-
-      if (response.data != null) {
-        final resultUpdate =
-            response.data!.cast<String, Map<String, dynamic>>();
-
-        return resultUpdate['set']!;
-      }
-    } on DioError catch (e) {
-      throw _handleError(e);
-    }
-    throw const DetaException();
-  }
-
-  @override
-  Future<bool> delete(String key) async {
-    try {
-      final response = await dio.delete<Map<String, dynamic>>(
-        '$baseUrl/$apiVersion/${deta.projectId}/$baseName/items/${Uri.encodeComponent(key)}',
-        options: _authorizationHeader(),
-      );
-
-      if (response.data != null) {
-        final responseData = response.data!.cast<String, String>();
-
-        return responseData['key']! == key;
-      }
-    } on DioError catch (_) {
-      return false;
-    }
-    return false;
-  }
-
-  @override
-  Future<Map<String, dynamic>> fetch({
-    List<DetaQuery> query = const [],
-    int limit = 1000,
-    String last = '',
-  }) async {
-    final querys = <Map>[];
-
-    if (query.isNotEmpty) {
-      querys.addAll(query.map((e) => e.query));
-    }
-
-    try {
-      final response = await dio.post<Map<String, dynamic>>(
-        '$baseUrl/$apiVersion/${deta.projectId}/$baseName/query',
-        options: _authorizationHeader(),
-        data: {'query': querys, 'limit': limit, 'last': last},
-      );
-
-      if (response.data != null) {
-        return response.data!;
-      }
-    } on DioError catch (e) {
-      throw _handleError(e);
-    }
-    throw const DetaException();
-  }
-
-  Options _authorizationHeader() {
-    return Options(
-      headers: <String, dynamic>{
-        'Accept': 'application/json',
-        'X-API-Key': deta.projectKey,
-      },
-    );
-  }
-
-  Exception _handleError(DioError e) {
-    if (e.response != null) {
-      if (e.response!.statusCode == 404) {
-        final data = e.response!.data as Map<String, dynamic>;
-
-        final map = data.cast<String, Object>();
-        if (map.containsKey('key')) {
-          return DetaItemNotFoundException(
-            message: 'Key ${map['key']} was not found',
-          );
-        } else {
-          final message = _castListTo<String>(data)['errors']!.first;
-          return DetaItemNotFoundException(message: message);
-        }
-      }
-
-      final data = e.response!.data as Map<String, dynamic>;
-
-      final message = _castListTo<String>(data)['errors']!.first;
-
-      if (e.response!.statusCode == 400) {
-        return DetaException(message: message);
-      }
-      if (e.response!.statusCode == 401) {
-        return DetaUnauthorizedException(message: message);
-      }
-      if (e.response!.statusCode == 409) {
-        return DetaObjectException(message: message);
-      }
-    }
-    return const DetaException();
+  /// Return authorization header
+  Map<String, String> _authorizationHeader() {
+    return <String, String>{
+      'Content-Type': 'application/json',
+      'X-API-Key': deta.projectKey,
+    };
   }
 
   Map<String, List<E>> _castListTo<E>(Map<String, dynamic> itemMap) => itemMap

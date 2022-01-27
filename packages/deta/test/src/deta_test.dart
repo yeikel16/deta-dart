@@ -1,23 +1,26 @@
+import 'package:client_deta_api/client_deta_api.dart';
 import 'package:deta/deta.dart';
 import 'package:deta/src/exceptions.dart';
-import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-class MockDio extends Mock implements Dio {}
+class MockClientDetaApi extends Mock implements ClientDetaApi {}
+
+class FakeData extends Fake {}
 
 void main() {
   late final Deta tDeta;
-  late Dio mockDio;
+  late MockClientDetaApi mockClient;
   const tProjectId = 'project-id';
   const tProjectKey = '${tProjectId}_key';
   const tBaseName = 'base_name';
   const tUrlBase = 'https://database.deta.sh/v1/$tProjectId/$tBaseName';
-  const tUrl = 'https://database.deta.sh/v1/$tProjectId/$tBaseName/items';
+  final tUrl =
+      Uri.parse('https://database.deta.sh/v1/$tProjectId/$tBaseName/items');
 
   setUpAll(() {
-    mockDio = MockDio();
-    tDeta = Deta(projectKey: tProjectKey, dio: mockDio);
+    mockClient = MockClientDetaApi();
+    tDeta = Deta(projectKey: tProjectKey, client: mockClient);
   });
 
   void whenPutEspecificType<E>(E data, {String? key}) {
@@ -33,14 +36,14 @@ void main() {
     }
 
     when(
-      () => mockDio.put<Map<String, dynamic>>(
+      () => mockClient.put<Map<String, dynamic>>(
         tUrl,
-        options: any(named: 'options'),
+        headers: any<Map<String, String>>(named: 'headers'),
         data: {'items': items},
       ),
     ).thenAnswer(
-      (_) async => Response(
-        data: <String, dynamic>{
+      (_) async => DetaResponse(
+        body: <String, dynamic>{
           'processed': <String, dynamic>{
             'items': <dynamic>[
               {
@@ -51,9 +54,6 @@ void main() {
           }
         },
         statusCode: 207,
-        requestOptions: RequestOptions(
-          path: tUrl,
-        ),
       ),
     );
   }
@@ -163,7 +163,7 @@ void main() {
 
       test('should throw `DetaObjectException` when is not a primitive object',
           () {
-        final tFakeObject = Options();
+        final tFakeObject = FakeData();
         final base = tDeta.base(tBaseName);
 
         expect(base.put(tFakeObject), throwsA(isA<DetaObjectException>()));
@@ -172,9 +172,9 @@ void main() {
       test('should throw `DetaExcepcion` when the key is a empty string',
           () async {
         when(
-          () => mockDio.put<Map<String, dynamic>>(
+          () => mockClient.put<Map<String, dynamic>>(
             tUrl,
-            options: any(named: 'options'),
+            headers: any<Map<String, String>>(named: 'headers'),
             data: {
               'items': [
                 <String, dynamic>{
@@ -185,20 +185,13 @@ void main() {
             },
           ),
         ).thenThrow(
-          DioError(
-            requestOptions: RequestOptions(
-              path: tUrl,
-            ),
-            response: Response<Map<String, dynamic>>(
-              data: <String, dynamic>{
+          DetaError(
+            response: DetaResponse<Map<String, dynamic>>(
+              body: <String, dynamic>{
                 'errors': <dynamic>['Bad item']
               },
               statusCode: 400,
-              requestOptions: RequestOptions(
-                path: tUrl,
-              ),
             ),
-            error: DioErrorType.response,
           ),
         );
 
@@ -217,9 +210,9 @@ void main() {
           'should throw `DetaUnauthorizedException`when the call '
           'is not authorized', () async {
         when(
-          () => mockDio.put<Map<String, dynamic>>(
+          () => mockClient.put<Map<String, dynamic>>(
             tUrl,
-            options: any(named: 'options'),
+            headers: any<Map<String, String>>(named: 'headers'),
             data: {
               'items': [
                 <String, dynamic>{
@@ -230,20 +223,13 @@ void main() {
             },
           ),
         ).thenThrow(
-          DioError(
-            requestOptions: RequestOptions(
-              path: tUrl,
-            ),
-            response: Response<Map<String, dynamic>>(
-              data: <String, dynamic>{
+          DetaError(
+            response: DetaResponse<Map<String, dynamic>>(
+              body: <String, dynamic>{
                 'errors': <dynamic>['Unauthorized']
               },
               statusCode: 401,
-              requestOptions: RequestOptions(
-                path: tUrl,
-              ),
             ),
-            error: DioErrorType.response,
           ),
         );
 
@@ -289,7 +275,7 @@ void main() {
         final base = tDeta.base(tBaseName);
 
         expect(
-          () => base.putMany(items: <Object>['hello', 'world', Options()]),
+          () => base.putMany(items: <Object>['hello', 'world', FakeData()]),
           throwsA(isA<DetaObjectException>()),
         );
       });
@@ -307,20 +293,17 @@ void main() {
         ];
 
         when(
-          () => mockDio.put<Map<String, dynamic>>(
+          () => mockClient.put<Map<String, dynamic>>(
             tUrl,
-            options: any(named: 'options'),
+            headers: any<Map<String, String>>(named: 'headers'),
             data: {'items': itemsMap},
           ),
         ).thenAnswer(
-          (_) async => Response(
-            data: <String, dynamic>{
+          (_) async => DetaResponse(
+            body: <String, dynamic>{
               'processed': <String, dynamic>{'items': answer}
             },
             statusCode: 207,
-            requestOptions: RequestOptions(
-              path: tUrl,
-            ),
           ),
         );
 
@@ -337,26 +320,19 @@ void main() {
           'should throw `DetaUnauthorizedException`when the call '
           'is not authorized', () {
         when(
-          () => mockDio.put<Map<String, dynamic>>(
+          () => mockClient.put<Map<String, dynamic>>(
             tUrl,
-            options: any(named: 'options'),
+            headers: any<Map<String, String>>(named: 'headers'),
             data: {'items': itemsMap},
           ),
         ).thenThrow(
-          DioError(
-            requestOptions: RequestOptions(
-              path: tUrl,
-            ),
-            response: Response<Map<String, dynamic>>(
-              data: <String, dynamic>{
+          DetaError(
+            response: DetaResponse<Map<String, dynamic>>(
+              body: <String, dynamic>{
                 'errors': <dynamic>['Unauthorized']
               },
               statusCode: 401,
-              requestOptions: RequestOptions(
-                path: tUrl,
-              ),
             ),
-            error: DioErrorType.response,
           ),
         );
         final base = tDeta.base(tBaseName);
@@ -377,21 +353,20 @@ void main() {
         const value = 16;
 
         when(
-          () => mockDio.post<Map<String, dynamic>>(
+          () => mockClient.post<Map<String, dynamic>>(
             tUrl,
-            options: any(named: 'options'),
+            headers: any<Map<String, String>>(named: 'headers'),
             data: <String, dynamic>{
               'item': <String, dynamic>{'key': key, 'value': value}
             },
           ),
         ).thenAnswer(
-          (_) async => Response(
-            data: <String, dynamic>{
+          (_) async => DetaResponse(
+            body: <String, dynamic>{
               'key': key,
               'value': value,
             },
             statusCode: 201,
-            requestOptions: RequestOptions(path: tUrl),
           ),
         );
 
@@ -403,28 +378,21 @@ void main() {
 
       test('should throw `DetaObjectException`when the key already exists', () {
         when(
-          () => mockDio.post<Map<String, dynamic>>(
+          () => mockClient.post<Map<String, dynamic>>(
             tUrl,
-            options: any(named: 'options'),
+            headers: any<Map<String, String>>(named: 'headers'),
             data: <String, dynamic>{
               'item': <String, dynamic>{'value': 'hello'}
             },
           ),
         ).thenThrow(
-          DioError(
-            requestOptions: RequestOptions(
-              path: tUrl,
-            ),
-            response: Response<Map<String, dynamic>>(
-              data: <String, dynamic>{
+          DetaError(
+            response: DetaResponse<Map<String, dynamic>>(
+              body: <String, dynamic>{
                 'errors': <dynamic>['Key already exists']
               },
               statusCode: 409,
-              requestOptions: RequestOptions(
-                path: tUrl,
-              ),
             ),
-            error: DioErrorType.response,
           ),
         );
         final base = tDeta.base(tBaseName);
@@ -442,19 +410,16 @@ void main() {
       const key = 'book1';
       test('a stored item when the key is valid', () async {
         when(
-          () => mockDio.get<Map<String, dynamic>>(
-            '$tUrl/${Uri.encodeComponent(key)}',
-            options: any(named: 'options'),
+          () => mockClient.get<Map<String, dynamic>>(
+            Uri.parse('${tUrl.toString()}/${Uri.encodeComponent(key)}'),
+            headers: any<Map<String, String>>(named: 'headers'),
           ),
         ).thenAnswer(
-          (_) async => Response(
-            data: <String, dynamic>{
+          (_) async => DetaResponse(
+            body: <String, dynamic>{
               'key': key,
             },
             statusCode: 200,
-            requestOptions: RequestOptions(
-              path: '$tUrl/${Uri.encodeComponent(key)}',
-            ),
           ),
         );
 
@@ -468,23 +433,16 @@ void main() {
           'should throw `DetaItemNotFoundException` when the key is not exists',
           () {
         when(
-          () => mockDio.get<Map<String, dynamic>>(
-            '$tUrl/${Uri.encodeComponent(key)}',
-            options: any(named: 'options'),
+          () => mockClient.get<Map<String, dynamic>>(
+            Uri.parse('${tUrl.toString()}/${Uri.encodeComponent(key)}'),
+            headers: any<Map<String, String>>(named: 'headers'),
           ),
         ).thenThrow(
-          DioError(
-            requestOptions: RequestOptions(
-              path: '$tUrl/${Uri.encodeComponent(key)}',
-            ),
-            response: Response<Map<String, dynamic>>(
-              data: <String, dynamic>{'key': key},
+          DetaError(
+            response: DetaResponse<Map<String, dynamic>>(
+              body: <String, dynamic>{'key': key},
               statusCode: 404,
-              requestOptions: RequestOptions(
-                path: '$tUrl/${Uri.encodeComponent(key)}',
-              ),
             ),
-            error: DioErrorType.response,
           ),
         );
 
@@ -506,19 +464,16 @@ void main() {
       const key = '100';
       test('a stored item', () async {
         when(
-          () => mockDio.delete<Map<String, dynamic>>(
-            '$tUrl/${Uri.encodeComponent(key)}',
-            options: any(named: 'options'),
+          () => mockClient.delete<Map<String, dynamic>>(
+            Uri.parse('${tUrl.toString()}/${Uri.encodeComponent(key)}'),
+            headers: any<Map<String, String>>(named: 'headers'),
           ),
         ).thenAnswer(
-          (_) async => Response(
-            data: <String, dynamic>{
+          (_) async => DetaResponse(
+            body: <String, dynamic>{
               'key': key,
             },
             statusCode: 200,
-            requestOptions: RequestOptions(
-              path: '$tUrl/${Uri.encodeComponent(key)}',
-            ),
           ),
         );
 
@@ -531,23 +486,16 @@ void main() {
       test('should throw `DetaException` when occurs an error in the call.',
           () async {
         when(
-          () => mockDio.delete<Map<String, dynamic>>(
-            '$tUrl/${Uri.encodeComponent(key)}',
-            options: any(named: 'options'),
+          () => mockClient.delete<Map<String, dynamic>>(
+            Uri.parse('${tUrl.toString()}/${Uri.encodeComponent(key)}'),
+            headers: any<Map<String, String>>(named: 'headers'),
           ),
         ).thenThrow(
-          DioError(
-            requestOptions: RequestOptions(
-              path: '$tUrl/${Uri.encodeComponent(key)}',
-            ),
-            response: Response<Map<String, dynamic>>(
-              data: <String, dynamic>{'key': key},
+          DetaError(
+            response: DetaResponse<Map<String, dynamic>>(
+              body: <String, dynamic>{'key': key},
               statusCode: 400,
-              requestOptions: RequestOptions(
-                path: '$tUrl/${Uri.encodeComponent(key)}',
-              ),
             ),
-            error: DioErrorType.response,
           ),
         );
 
@@ -562,18 +510,15 @@ void main() {
       const item = {'name': 'deta', 'email': 'hello@deta.com'};
       test('a stored item', () async {
         when(
-          () => mockDio.patch<Map<String, dynamic>>(
-            '$tUrl/${Uri.encodeComponent(key)}',
-            options: any(named: 'options'),
+          () => mockClient.patch<Map<String, dynamic>>(
+            Uri.parse('${tUrl.toString()}/${Uri.encodeComponent(key)}'),
+            headers: any<Map<String, String>>(named: 'headers'),
             data: {'set': item},
           ),
         ).thenAnswer(
-          (_) async => Response(
-            data: <String, dynamic>{'key': key, 'set': item},
+          (_) async => DetaResponse(
+            body: <String, dynamic>{'key': key, 'set': item},
             statusCode: 200,
-            requestOptions: RequestOptions(
-              path: '$tUrl/${Uri.encodeComponent(key)}',
-            ),
           ),
         );
 
@@ -599,26 +544,19 @@ void main() {
           'should throw `DetaItemNotFoundException` '
           'when the key does not exist', () async {
         when(
-          () => mockDio.patch<Map<String, dynamic>>(
-            '$tUrl/${Uri.encodeComponent(key)}',
-            options: any(named: 'options'),
+          () => mockClient.patch<Map<String, dynamic>>(
+            Uri.parse('${tUrl.toString()}/${Uri.encodeComponent(key)}'),
+            headers: any<Map<String, String>>(named: 'headers'),
             data: {'set': item},
           ),
         ).thenThrow(
-          DioError(
-            requestOptions: RequestOptions(
-              path: '$tUrl/${Uri.encodeComponent(key)}',
-            ),
-            response: Response<Map<String, dynamic>>(
-              data: <String, dynamic>{
+          DetaError(
+            response: DetaResponse<Map<String, dynamic>>(
+              body: <String, dynamic>{
                 'errors': <dynamic>['Key not found']
               },
               statusCode: 404,
-              requestOptions: RequestOptions(
-                path: '$tUrl/${Uri.encodeComponent(key)}',
-              ),
             ),
-            error: DioErrorType.response,
           ),
         );
 
@@ -638,26 +576,19 @@ void main() {
         final data = {'key': key, 'user': item};
 
         when(
-          () => mockDio.patch<Map<String, dynamic>>(
-            '$tUrl/${Uri.encodeComponent(key)}',
-            options: any(named: 'options'),
+          () => mockClient.patch<Map<String, dynamic>>(
+            Uri.parse('${tUrl.toString()}/${Uri.encodeComponent(key)}'),
+            headers: any<Map<String, String>>(named: 'headers'),
             data: {'set': data},
           ),
         ).thenThrow(
-          DioError(
-            requestOptions: RequestOptions(
-              path: '$tUrl/${Uri.encodeComponent(key)}',
-            ),
-            response: Response<Map<String, dynamic>>(
-              data: <String, dynamic>{
+          DetaError(
+            response: DetaResponse<Map<String, dynamic>>(
+              body: <String, dynamic>{
                 'errors': <dynamic>['Bad Request: Can not update the key']
               },
               statusCode: 400,
-              requestOptions: RequestOptions(
-                path: '$tUrl/${Uri.encodeComponent(key)}',
-              ),
             ),
-            error: DioErrorType.response,
           ),
         );
 
@@ -692,20 +623,21 @@ void main() {
 
       test('all items when no parameters are passed', () async {
         when(
-          () => mockDio.post<Map<String, dynamic>>(
-            '$tUrlBase/query',
-            options: any(named: 'options'),
-            data: {
-              'query': <Map<String, dynamic>>[],
-              'limit': 1000,
-              'last': ''
-            },
-          ),
+          () {
+            return mockClient.post<Map<String, dynamic>>(
+              Uri.parse('$tUrlBase/query'),
+              headers: any<Map<String, String>>(named: 'headers'),
+              data: {
+                'query': <Map<String, dynamic>>[],
+                'limit': 1000,
+                'last': ''
+              },
+            );
+          },
         ).thenAnswer(
-          (_) async => Response(
-            data: response,
+          (_) async => DetaResponse(
+            body: response,
             statusCode: 200,
-            requestOptions: RequestOptions(path: '$tUrlBase/query'),
           ),
         );
 
@@ -717,9 +649,9 @@ void main() {
 
       test('some item when using the `query`', () async {
         when(
-          () => mockDio.post<Map<String, dynamic>>(
-            '$tUrlBase/query',
-            options: any(named: 'options'),
+          () => mockClient.post<Map<String, dynamic>>(
+            Uri.parse('$tUrlBase/query'),
+            headers: any<Map<String, String>>(named: 'headers'),
             data: {
               'query': <Map<String, dynamic>>[
                 detaQuery1.query,
@@ -730,11 +662,7 @@ void main() {
             },
           ),
         ).thenAnswer(
-          (_) async => Response(
-            data: response,
-            statusCode: 200,
-            requestOptions: RequestOptions(path: '$tUrlBase/query'),
-          ),
+          (_) async => DetaResponse(body: response, statusCode: 200),
         );
 
         final base = tDeta.base(tBaseName);
@@ -751,22 +679,19 @@ void main() {
           'should throw `DetaException` '
           'when `limit` is less than 1', () async {
         when(
-          () => mockDio.post<Map<String, dynamic>>(
-            '$tUrlBase/query',
-            options: any(named: 'options'),
+          () => mockClient.post<Map<String, dynamic>>(
+            Uri.parse('$tUrlBase/query'),
+            headers: any<Map<String, String>>(named: 'headers'),
             data: {'query': <Map<String, dynamic>>[], 'limit': 0, 'last': ''},
           ),
         ).thenThrow(
-          DioError(
-            requestOptions: RequestOptions(path: '$tUrlBase/query'),
-            response: Response<Map<String, dynamic>>(
-              data: <String, dynamic>{
+          DetaError(
+            response: DetaResponse<Map<String, dynamic>>(
+              body: <String, dynamic>{
                 'errors': <dynamic>['Limit min value 1']
               },
               statusCode: 400,
-              requestOptions: RequestOptions(path: '$tUrlBase/query'),
             ),
-            error: DioErrorType.response,
           ),
         );
 
@@ -786,9 +711,9 @@ void main() {
         final wrongQuery = DetaQuery('key').equalTo('key');
 
         when(
-          () => mockDio.post<Map<String, dynamic>>(
-            '$tUrlBase/query',
-            options: any(named: 'options'),
+          () => mockClient.post<Map<String, dynamic>>(
+            Uri.parse('$tUrlBase/query'),
+            headers: any<Map<String, String>>(named: 'headers'),
             data: {
               'query': <Map<String, dynamic>>[wrongQuery.query],
               'limit': 1000,
@@ -796,16 +721,13 @@ void main() {
             },
           ),
         ).thenThrow(
-          DioError(
-            requestOptions: RequestOptions(path: '$tUrlBase/query'),
-            response: Response<Map<String, dynamic>>(
-              data: <String, dynamic>{
+          DetaError(
+            response: DetaResponse<Map<String, dynamic>>(
+              body: <String, dynamic>{
                 'errors': <dynamic>['Bad query']
               },
               statusCode: 400,
-              requestOptions: RequestOptions(path: '$tUrlBase/query'),
             ),
-            error: DioErrorType.response,
           ),
         );
 
