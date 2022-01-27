@@ -8,3 +8,7 @@
 
 * refactor: implement `Exception` in `DetaError`.
 * refactor: add named parameters in `DetaReponse` constructor.
+
+## 0.0.2
+
+* docs: update **README.md**

@@ -5,6 +5,11 @@
 
 Basic interface of requests from a client to interact with the Deta API.
 
+## This package is implemented in
+
+* [dio_client_deta_api](https://pub.dev/packages/dio_client_deta_api) used by the HTTP client of the [dio](https://pub.dev/packages/dio) package
+* [http_client_deta_api](https://pub.dev/packages/http_client_deta_api) used by the HTTP client of the [http](https://pub.dev/packages/http) package
+
 ---
 
 A Very Good Project created by Very Good CLI.
