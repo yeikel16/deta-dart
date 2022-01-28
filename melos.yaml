@@ -1,7 +1,10 @@
 name: deta-dart
 
 packages:
-  - "**"
+  - packages/**
+
+# This configuration is a modification of the `coverde` repository, 
+# you can see the original here -> https://github.com/mrverdant13/coverde/blob/main/melos.yaml
 
 scripts:
   d:
@@ -62,8 +65,12 @@ scripts:
     description: Merge all packages coverage tracefiles ignoring data related to generated files.
     run: >
       coverde rm MELOS_ROOT_PATH/coverage/filtered.lcov.info &&
-      melos exec --file-exists=coverage/lcov.info -- coverde filter --input ./coverage/lcov.info --output MELOS_ROOT_PATH/coverage/filtered.lcov.info --filters \.asset\.dart &&
-      coverde check -i coverage/filtered.lcov.info 100
+      melos exec --file-exists=coverage/lcov.info -- coverde filter --input ./coverage/lcov.info --output MELOS_ROOT_PATH/coverage/filtered.lcov.info --filters \.asset\.dart
+  
+  CH:
+    description: Check minimum coverage
+    run: coverde check -i coverage/filtered.lcov.info 100
+  
   R:
     description: Generate HTML coverage report.
     run: coverde report --input ./coverage/lcov.info
@@ -77,19 +84,14 @@ scripts:
 
   TMC:
     description: Run tests, generate unified coverage trace file and check minimum coverage.
-    run: melos run T && melos run MC
+    run: melos run T && melos run MC && melos run CH
   TMC:ci:
     description: Run tests, generate unified coverage trace file and check minimum coverage.
-    run: melos run T:ci && melos run MC
-
-  P:
-    # HACK: Allowing 10 points of tolerance since JS runtime is not supported yet.
-    description: Check pub score.
-    run: dart run tool/pub_score_checker.dart 10
+    run: melos run T:ci && melos run MC && melos run CH
 
   WF:
     description: Run full local workflow
-    run: melos run FA && melos run TMC && melos run P
+    run: melos run FA && melos run TMC
   WF:ci:
     description: Run full CI workflow
-    run: melos run FA:ci && melos run TMC:ci && melos run P
+    run: melos run FA:ci && melos run TMC:ci
