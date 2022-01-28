@@ -3,7 +3,7 @@ name: deta-dart
 packages:
   - packages/**
 
-# This configuration is a modification of the `coverde` repository, 
+# This configuration is a modification of the `coverde` repository,
 # you can see the original here -> https://github.com/mrverdant13/coverde/blob/main/melos.yaml
 
 scripts:
@@ -66,7 +66,7 @@ scripts:
     run: >
       coverde rm MELOS_ROOT_PATH/coverage/filtered.lcov.info &&
       melos exec --file-exists=coverage/lcov.info -- coverde filter --input ./coverage/lcov.info --output MELOS_ROOT_PATH/coverage/filtered.lcov.info --filters \.asset\.dart
-  
+
   CH:
     description: Check minimum coverage
     run: coverde check -i coverage/filtered.lcov.info 100
