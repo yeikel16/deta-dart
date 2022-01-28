@@ -9,7 +9,7 @@ on:
       - "**.yml"
   pull_request:
     branches:
-      - dev
+      - main
     paths-ignore:
       - "**.md"
       - "**.yml"
@@ -18,33 +18,31 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
       - uses: actions/checkout@v2
+      - name: Install dart
       - uses: dart-lang/setup-dart@v1
+      - name: Install melos
+        run: dart pub global activate melos
+      - name: Install coverage
+        run: dart pub global activate coverage
+      - name: Install coverde
+        run: dart pub global activate coverde
+      - name: Initialize melos
+        run: melos bs
+      - name: Run tests, merge tests if needed, and check 100% coverage
+        run: melos run TMC:ci
 
-      - name: Install Dependencies
-        run: pub get
-
-      - name: Format
-        run: dart format --set-exit-if-changed .
-
-      - name: Analyze
-        run: dart analyze --fatal-infos --fatal-warnings .
-
-      - name: Run Tests
-        run: |
-          pub global activate test_coverage
-          export PATH=$PATH:$HOME/.pub-cache/bin
-          test_coverage
-      - name: Check 95% code coverage
-        uses: VeryGoodOpenSource/very_good_coverage@v1.2.0
-        with:
-          path: "./coverage/lcov.info"
-          min_coverage: 95
-          exclude: "**/*.freezed.dart **/*.g.dart **/*.gr.dart"
+      # - name: Check 95% code coverage
+      #   uses: VeryGoodOpenSource/very_good_coverage@v1.2.0
+      #   with:
+      #     path: "./coverage/lcov.info"
+      #     min_coverage: 95
+      #     exclude: "**/*.freezed.dart **/*.g.dart **/*.gr.dart"
 
       - name: Upload coverage data to codecov.io
         uses: codecov/codecov-action@v2
         with:
-          files: "./coverage/lcov.info"
+          files: "./coverage/filtered.lcov.info"
           fail_ci_if_error: true
           verbose: true

@@ -7,3 +7,8 @@ build/
 pubspec.lock
 coverage/
 packages/http_client_deta_api/test/.test_coverage.dart
+
+# Melos
+melos_deta-dart.iml
+.idea/
+*.iml
