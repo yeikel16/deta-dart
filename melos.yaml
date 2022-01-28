@@ -66,7 +66,6 @@ scripts:
     run: >
       coverde rm MELOS_ROOT_PATH/coverage/filtered.lcov.info &&
       melos exec --file-exists=coverage/lcov.info -- coverde filter --input ./coverage/lcov.info --output MELOS_ROOT_PATH/coverage/filtered.lcov.info --filters \.asset\.dart
-
   CH:
     description: Check minimum coverage
     run: coverde check -i coverage/filtered.lcov.info 100
