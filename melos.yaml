@@ -70,9 +70,9 @@ scripts:
     description: Check minimum coverage
     run: coverde check -i coverage/filtered.lcov.info 100
   
-  R:
-    description: Generate HTML coverage report.
-    run: coverde report --input ./coverage/lcov.info
+  RO:
+    description: Generate HTML coverage report and open in the browers.
+    run: coverde report --input ./coverage/filtered.lcov.info -l
 
   FA:
     description: Format and analyze.
