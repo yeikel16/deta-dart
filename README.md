@@ -6,9 +6,22 @@
 
 A Dart package to interact with the [HTTP API](https://docs.deta.sh/) of the free services of the [Deta](https://deta.sh/) plataform.
 
-## Getting Started
+## Index
 
-Check the full example [here](https://github.com/yeikel16/deta-dart/blob/main/example/deta_base_example.dart).
+* [DetaBase](https://github.com/yeikel16/deta-dart/#DetaBase)
+  * [put](https://github.com/yeikel16/deta-dart/#put)
+  * [putMany](https://github.com/yeikel16/deta-dart/#putMany)
+  * [insert](https://github.com/yeikel16/deta-dart/#insert)
+  * [get](https://github.com/yeikel16/deta-dart/#get)
+  * [update](https://github.com/yeikel16/deta-dart/#update)
+  * [delete](https://github.com/yeikel16/deta-dart/#delete)
+  * [fetch](https://github.com/yeikel16/deta-dart/#fetch)
+
+* DetaDrive(Coming soon)
+
+### Getting Started
+
+Check the full example [here](https://github.com/yeikel16/deta-dart/blob/main/packages/deta/example/example.md).
 
 ### Install
 
@@ -22,9 +35,13 @@ dependencies:
 ### Usege
 
 We declare class **Deta**, which receives our private credential as a parameter.
+The `client` parameter can receive two different implementations `DioClientDetaApi` or `HttpClientDetaApi`, you need to add to its dependencies the one you prefer.
+
+* [DioClientDetaApi](https://pub.dev/packages/dio_client_deta_api) used by the HTTP client of the [dio](https://pub.dev/packages/dio) package.
+* [HttpClientDetaApi](https://pub.dev/packages/http_client_deta_api) used by the HTTP client of the [http](https://pub.dev/packages/http) package.
 
 ```dart
-  final deta = Deta(projectKey: 'projectKey', dio: Dio());
+  final deta = Deta(projectKey: 'projectKey', client: DioClientDetaApi(dio: Dio()));
 ```
 
 🚨  **WARNING** 🚨
@@ -147,19 +164,11 @@ flutter test --coverage --test-randomize-ordering-seed random
 
 ```
 
-To view the generated coverage report you can use [lcov](https://github.com/linux-test-project/lcov).
+To view the generated coverage report you can use [coverde](https://pub.dev/packages/coverde).
 
 ```sh
 # Generate Coverage Report
-$ genhtml coverage/lcov.info -o coverage/
-
-# Open Coverage Report in Mac or Linux
-$ open coverage/index.html # 
-```
-
-``` powershell
-# Open Coverage Report in Windows
- Invoke-Expression coverage/index.html # 
+$ coverde report
 ```
 
 ---

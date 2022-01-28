@@ -6,9 +6,22 @@
 
 A Dart package to interact with the [HTTP API](https://docs.deta.sh/) of the free services of the [Deta](https://deta.sh/) plataform.
 
+## Index
+
+* [DetaBase](https://pub.dev/packages/deta#DetaBase)
+  * [put](https://pub.dev/packages/deta#put)
+  * [putMany](https://pub.dev/packages/deta#putMany)
+  * [insert](https://pub.dev/packages/deta#insert)
+  * [get](https://pub.dev/packages/deta#get)
+  * [update](https://pub.dev/packages/deta#update)
+  * [delete](https://pub.dev/packages/deta#delete)
+  * [fetch](https://pub.dev/packages/deta#fetch)
+
+* DetaDrive(Coming soon)
+
 ## Getting Started
 
-Check the full example [here](https://github.com/yeikel16/deta-dart/blob/main/example/deta_base_example.dart).
+Check the full example [here](https://github.com/yeikel16/deta-dart/blob/main/packages/deta/example/example.md).
 
 ### Install
 
