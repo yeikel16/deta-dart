@@ -6,6 +6,11 @@
 
 A Dart package to interact with the [HTTP API](https://docs.deta.sh/) of the free services of the [Deta](https://deta.sh/) plataform.
 
+🚨  **WARNING** 🚨
+**This client should only be used on the server side.**
+
+---
+
 ## Index
 
 * [DetaBase](https://github.com/yeikel16/deta-dart/#DetaBase)
