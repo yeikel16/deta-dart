@@ -18,3 +18,9 @@
 
 * fix named parameters in `DetaReponse` constructor
 * change `client_deta_api` version to 0.0.2
+
+## 0.0.3+1
+
+* rearrange: move everything related to DetaBase to the deta_base file.
+* docs: fix broken link [#8](https://github.com/yeikel16/deta-dart/issues/8)
+* docs: add warning for the client should only be used on the server side.
