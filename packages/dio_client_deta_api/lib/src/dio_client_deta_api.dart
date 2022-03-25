@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:client_deta_api/client_deta_api.dart';
 import 'package:dio/dio.dart';
 
@@ -14,11 +16,13 @@ class DioClientDetaApi extends ClientDetaApi {
   Future<DetaResponse<T>> get<T>(
     Uri url, {
     Map<String, String> headers = const {},
+    ProgressRequestCallback? onReceiveProgress,
   }) async {
     try {
       final response = await _dio.getUri<T>(
         url,
         options: Options(headers: headers),
+        onReceiveProgress: onReceiveProgress,
       );
 
       return DetaResponse(body: response.data, statusCode: response.statusCode);
@@ -32,12 +36,16 @@ class DioClientDetaApi extends ClientDetaApi {
     Uri url, {
     Map<String, String> headers = const {},
     Object? data,
+    ProgressRequestCallback? onSendProgress,
+    ProgressRequestCallback? onReceiveProgress,
   }) async {
     try {
       final response = await _dio.putUri<T>(
         url,
         data: data,
         options: Options(headers: headers),
+        onSendProgress: onSendProgress,
+        onReceiveProgress: onReceiveProgress,
       );
 
       return DetaResponse(body: response.data, statusCode: response.statusCode);
@@ -51,13 +59,28 @@ class DioClientDetaApi extends ClientDetaApi {
     Uri url, {
     Map<String, String> headers = const {},
     Object? data,
+    ProgressRequestCallback? onSendProgress,
+    ProgressRequestCallback? onReceiveProgress,
   }) async {
+    Response<T> response;
     try {
-      final response = await _dio.postUri<T>(
-        url,
-        data: data,
-        options: Options(headers: headers),
-      );
+      if (data is Uint8List) {
+        response = await _dio.postUri<T>(
+          url,
+          data: Stream.fromIterable(data.toList().map((e) => [e])),
+          options: Options(headers: headers),
+          onSendProgress: onSendProgress,
+          onReceiveProgress: onReceiveProgress,
+        );
+      } else {
+        response = await _dio.postUri<T>(
+          url,
+          data: data,
+          options: Options(headers: headers),
+          onSendProgress: onSendProgress,
+          onReceiveProgress: onReceiveProgress,
+        );
+      }
 
       return DetaResponse(body: response.data, statusCode: response.statusCode);
     } on DioError catch (e) {
@@ -70,12 +93,16 @@ class DioClientDetaApi extends ClientDetaApi {
     Uri url, {
     Map<String, String> headers = const {},
     Object? data,
+    ProgressRequestCallback? onSendProgress,
+    ProgressRequestCallback? onReceiveProgress,
   }) async {
     try {
       final response = await _dio.patchUri<T>(
         url,
         data: data,
         options: Options(headers: headers),
+        onSendProgress: onSendProgress,
+        onReceiveProgress: onReceiveProgress,
       );
 
       return DetaResponse(body: response.data, statusCode: response.statusCode);
