@@ -66,3 +66,17 @@ class DetaItemNotFoundException implements Exception {
   @override
   String toString() => 'DetaItemNotFoundException(message: $message)';
 }
+
+/// {@template deta_drive_exception}
+/// The exception is thrown when occur an error in drive service.
+/// {@endtemplate}
+class DetaDriveException implements Exception {
+  /// {@macro deta_drive_exception}
+  const DetaDriveException({this.message = 'Unknown'});
+
+  /// The message of the exception.
+  final String message;
+
+  @override
+  String toString() => 'DetaDriveException(message: $message)';
+}
