@@ -114,12 +114,6 @@ abstract class DetaBase {
   Future<Map> update({required String key, required Map item});
 }
 
-/// Base URL for Deta API.
-const baseUrl = 'https://database.deta.sh';
-
-/// API version.
-const apiVersion = 'v1';
-
 /// {@template deta_base}
 /// Implemtation of the [DetaBase] interface.
 /// {@endtemplate}
@@ -133,8 +127,6 @@ class _DetaBase extends DetaBase {
 
   /// The `baseName` is the name given to your database
   final String baseName;
-
-  // https://database.deta.sh/v1/{project_id}/{base_name}
 
   // Deta instance.
   final Deta deta;

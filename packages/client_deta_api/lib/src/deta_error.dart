@@ -14,7 +14,7 @@ class DetaError implements Exception {
 
   @override
   String toString() {
-    return 'DetaError(response: Response(body: ${response?.body}, '
+    return 'DetaError(response: DetaResponse(body: ${response?.body}, '
         'statusCode: ${response?.statusCode}))';
   }
 }
