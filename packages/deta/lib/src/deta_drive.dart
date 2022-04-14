@@ -11,6 +11,8 @@ abstract class DetaDrive {
   const DetaDrive();
 
   /// Upload a file.
+  ///
+  /// max upload file size using this method is 10Mb only
   Future<DetaDriveResponse> uploadFile(
     File file,
     String fileName, {
@@ -18,8 +20,21 @@ abstract class DetaDrive {
     void Function(int progress, int total)? onSendProgress,
   });
 
+  /// Upload a file larger than 10Mb.
+  ///
+  /// with chunked upload
+  // Future<DetaDriveResponse> chunkedFileUpload(
+  //   File file,
+  //   String fileName, {
+  //   String? directory,
+  //   void Function(int progress, int total)? onSendProgress,
+  // });
+
   /// Download a file.
-  Future<DetaDriveResponse> downloadFile(String fileName);
+  Future<DetaDriveResponse> downloadFile(
+    String fileName, {
+    void Function(int progress, int total)? onDownloadProgress,
+  });
 
   /// Show a list of files save in the storage.
   Future<DetaDriveResponse> listFiles({
@@ -71,7 +86,7 @@ class _DetaDrive extends DetaDrive {
     try {
       final resp = await client.post<Map<String, dynamic>>(
         Uri.parse('${driveUrl.toString()}/files?name=$fileName'),
-        data: fileInBytes,
+        data: Stream.fromIterable(fileInBytes.toList().map((e) => [e])),
         headers: <String, String>{
           'Content-Type': 'application/json',
           'X-API-Key': deta.projectKey,
@@ -91,15 +106,54 @@ class _DetaDrive extends DetaDrive {
   }
 
   @override
-  Future<DetaDriveResponse> deleteFiles(List<String> filenames) {
-    // TODO: implement deleteFiles
-    throw UnimplementedError();
+  Future<DetaDriveResponse> deleteFiles(List<String> filenames) async {
+    try {
+      final resp = await client.delete<Map<String, dynamic>>(
+        Uri.parse(
+          '${driveUrl.toString()}/files',
+        ),
+        data: {'names': filenames},
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'X-API-Key': deta.projectKey,
+        },
+      );
+
+      if (resp.statusCode == 200) {
+        // todo: verify proper response
+        // return DetaDriveResponse.fromJson(resp.body!);
+      }
+    } on DetaError catch (e) {
+      throw _handleError(e);
+    }
+    throw const DetaDriveException();
   }
 
   @override
-  Future<DetaDriveResponse> downloadFile(String fileName) {
-    // TODO: implement downloadFile
-    throw UnimplementedError();
+  Future<DetaDriveResponse> downloadFile(
+    String fileName, {
+    void Function(int progress, int total)? onDownloadProgress,
+  }) async {
+    try {
+      final resp = await client.get<List<int>>(
+        Uri.parse(
+          '${driveUrl.toString()}/files/download?name=$fileName',
+        ),
+        headers: <String, String>{
+          'X-API-Key': deta.projectKey,
+        },
+        onReceiveProgress: onDownloadProgress,
+      );
+
+      if (resp.statusCode == 200) {
+        // todo: file byte data,  verify proper response
+        // return resp.data;
+        // return DetaDriveResponse.fromJson(resp.body!);
+      }
+    } on DetaError catch (e) {
+      throw _handleError(e);
+    }
+    throw const DetaDriveException();
   }
 
   @override
@@ -107,9 +161,26 @@ class _DetaDrive extends DetaDrive {
     int limit = 1000,
     String prefix = '',
     String last = '',
-  }) {
-    // TODO: implement listFiles
-    throw UnimplementedError();
+  }) async {
+    try {
+      final resp = await client.get<Map<String, dynamic>>(
+        Uri.parse(
+          '${driveUrl.toString()}/files?limit=$limit&prefix=$prefix&last=$last',
+        ),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'X-API-Key': deta.projectKey,
+        },
+      );
+
+      if (resp.statusCode == 200) {
+        // todo: verify proper response for listFiles
+        return DetaDriveResponse.fromJson(resp.body!);
+      }
+    } on DetaError catch (e) {
+      throw _handleError(e);
+    }
+    throw const DetaDriveException();
   }
 
   Exception _handleError(DetaError e) {
